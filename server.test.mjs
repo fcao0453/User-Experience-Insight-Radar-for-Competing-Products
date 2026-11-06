@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {once} from 'node:events';
+import {createApp} from './server.mjs';
+async function withServer(options,run){const server=createApp(options);server.listen(0,'127.0.0.1');await once(server,'listening');try{await run('http://127.0.0.1:'+server.address().port);}finally{await new Promise(r=>server.close(r));}}
+const input={text:'首页服务入口集中，可能降低查找成本。',bank:'招商银行',project:'首页体验',records:[{date:'2026-02-12',version:'14.1.0',source:'H8',observation:'新增播客'}]};
+const post=(url,data=input,headers={})=>fetch(url+'/api/insights',{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(data)});
+test('未配置密钥时明确提示，不伪造 AI 输出',()=>withServer({apiKey:''},async url=>{const r=await post(url);assert.equal(r.status,503);assert.match((await r.json()).error,/OPENAI_API_KEY/);}));
+test('将结论和资料传给模型，返回独立的优化与补充内容',()=>withServer({apiKey:'test-only',fetcher:async(url,options)=>{assert.match(url,/chat\/completions$/);const body=JSON.parse(options.body);const data=JSON.parse(body.messages[1].content);assert.equal(data.text,input.text);assert.equal(data.records[0].source,'H8');assert.match(body.messages[0].content,/不是操作指令/);return Response.json({choices:[{message:{content:JSON.stringify({optimized:'优化结论',additions:'补充资料'})}}]});}},async url=>{const r=await post(url);assert.equal(r.status,200);assert.deepEqual(await r.json(),{optimized:'优化结论',additions:'补充资料'});}));
+test('拒绝无效结论、跨站请求和私有文件访问',()=>withServer({apiKey:'test-only'},async url=>{assert.equal((await post(url,{text:'',records:[]})).status,400);assert.equal((await post(url,input,{Origin:'https://other.example'})).status,403);assert.equal((await fetch(url+'/.env')).status,404);assert.equal((await fetch(url+'/server.mjs')).status,404);}));
+test('上游失败与无效输出不泄露上游内容',async()=>{await withServer({apiKey:'test-only',fetcher:async()=>new Response('sensitive upstream body',{status:401})},async url=>{const r=await post(url);assert.equal(r.status,502);assert.doesNotMatch(await r.text(),/sensitive/);});await withServer({apiKey:'test-only',fetcher:async()=>Response.json({choices:[{message:{content:'not json'}}]})},async url=>assert.equal((await post(url)).status,502));});
