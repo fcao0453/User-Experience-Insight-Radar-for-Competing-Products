@@ -1,0 +1,1 @@
+{"name":"guanwei-research-radar","version":"1.0.0","private":true,"type":"module","scripts":{"start":"node --env-file-if-exists=.env server.mjs","test":"node --test server.test.mjs","check":"node --check app.js && node --check server.mjs"},"engines":{"node":">=22"}}
