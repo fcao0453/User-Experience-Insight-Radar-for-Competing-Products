@@ -3,6 +3,8 @@
 该仓库包含程序代码与七家银行的名称框架，不包含私有 Excel 的研究文字、版本记录或截图。完整研究资料可通过侧栏「导入研究资料」选择本地 JSON 文件，在浏览器内导入，不会自动上传到 GitHub。资料文字与草稿保存在 localStorage，截图保存在 IndexedDB。
 
 AI 请求会把当前结论与当前项目所引的最近 20 条观察文字发送到服务端配置的 AI 提供商；不会发送截图。
+1.0版本浏览链接：https://fcao0453.github.io/User-Experience-Insight-Radar-for-Competing-Products/
+部分功能仅为展示示例，未来将进一步完善
 
 ## 启动
 
