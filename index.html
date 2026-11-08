@@ -1,2 +1,1160 @@
-<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>观微 · 竞品研究工作台</title><link rel="stylesheet" href="styles.css"></head><body><div id="app"></div><div id="modal"></div><script src="evidence.js"></script><script src="app.js"></script></body></html>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>观微</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* 布局：左侧项目栏（对话式 AI 风格）+ 右侧工作区；看板先摘要后卡片，对比页截图优先 */
+:root{
+  --bg:#F4F5F2; --panel:#FFFFFF; --sunk:#EBEDE8; --side:#E9ECE6;
+  --line:#D9DDD4; --line-2:#C2C7BC;
+  --ink:#1B201E; --ink-2:#48504C; --ink-3:#757D78;
+  --accent:#2B5A86; --accent-ink:#FFFFFF; --accent-soft:#E2EAF2;
+  --st-store:#8F5200; --st-store-bg:#FAEBD2;
+  --st-pend:#A8381C; --st-pend-bg:#F7E1D9;
+  --st-chg:#1D5A9E; --st-chg-bg:#DFE9F6;
+  --st-same:#3F6550; --st-same-bg:#E1ECE4;
+  --demo:#64479A; --demo-bg:#ECE6F6;
+  --warn:#8A5A00; --warn-bg:#FBF1DC;
+  --shadow:0 1px 2px rgba(20,30,25,.06),0 4px 14px rgba(20,30,25,.06);
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei","Hiragino Sans GB",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151917; --panel:#1D2220; --sunk:#232926; --side:#1A1F1D;
+  --line:#2F3632; --line-2:#3F4742;
+  --ink:#E7EBE8; --ink-2:#B6BEB9; --ink-3:#88918C;
+  --accent:#7FA9D6; --accent-ink:#0F1A24; --accent-soft:#22303D;
+  --st-store:#F0B865; --st-store-bg:#3A2C14;
+  --st-pend:#F09A80; --st-pend-bg:#3B221B;
+  --st-chg:#8DB8EC; --st-chg-bg:#1E2D40;
+  --st-same:#94C7A6; --st-same-bg:#1E3127;
+  --demo:#BBA2E6; --demo-bg:#2C2440;
+  --warn:#E9BE6B; --warn-bg:#352A14;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#151917; --panel:#1D2220; --sunk:#232926; --side:#1A1F1D;
+  --line:#2F3632; --line-2:#3F4742;
+  --ink:#E7EBE8; --ink-2:#B6BEB9; --ink-3:#88918C;
+  --accent:#7FA9D6; --accent-ink:#0F1A24; --accent-soft:#22303D;
+  --st-store:#F0B865; --st-store-bg:#3A2C14;
+  --st-pend:#F09A80; --st-pend-bg:#3B221B;
+  --st-chg:#8DB8EC; --st-chg-bg:#1E2D40;
+  --st-same:#94C7A6; --st-same-bg:#1E3127;
+  --demo:#BBA2E6; --demo-bg:#2C2440;
+  --warn:#E9BE6B; --warn-bg:#352A14;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+  color-scheme:dark;}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.6;}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-size:22px;font-weight:700;line-height:1.35}
+h2{font-size:15px;font-weight:700}
+h3{font-size:14px;font-weight:500}
+p{margin:0}
+
+.app{display:grid;grid-template-columns:256px minmax(0,1fr);height:100%}
+/* ---------- 侧栏 ---------- */
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;padding:14px 12px 12px}
+.brand{display:flex;align-items:center;gap:8px;padding:2px 6px 12px;font-weight:700;font-size:15px}
+.brand .logo{width:22px;height:22px;border-radius:6px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:12px}
+.brand small{font-weight:400;color:var(--ink-3);font-size:11px;border:1px solid var(--line-2);border-radius:4px;padding:0 5px}
+.newbtn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border:1px solid var(--line-2);background:var(--panel);border-radius:var(--r);cursor:pointer;font-weight:500;text-align:left}
+.newbtn:hover{border-color:var(--accent)}
+.newbtn .plus{font-size:16px;line-height:1;color:var(--accent)}
+.snav{display:flex;flex-direction:column;gap:2px;margin-top:12px}
+.snav a,.sproj a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none}
+.snav a:hover,.sproj a:hover{background:var(--sunk);color:var(--ink)}
+.snav a.on,.sproj a.on{background:var(--panel);color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--line)}
+.sgroup{margin-top:16px;min-height:0;overflow:auto;flex:1}
+.glabel{font-size:11px;letter-spacing:.08em;color:var(--ink-3);padding:4px 10px;text-transform:uppercase}
+.gname{font-size:12.5px;color:var(--ink-2);padding:8px 10px 2px;font-weight:500;display:flex;align-items:center;gap:6px}
+.gname::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--ink-3)}
+.sproj a{padding-left:24px;font-size:13.5px}
+.cnt{font-size:11px;font-family:var(--f-mono);background:var(--st-store-bg);color:var(--st-store);border-radius:10px;padding:0 7px;line-height:18px}
+.sfoot{border-top:1px solid var(--line);padding-top:10px;margin-top:8px;font-size:12px;color:var(--ink-3);display:flex;flex-direction:column;gap:6px}
+.sfoot button{background:none;border:0;padding:0;color:var(--ink-3);text-align:left;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.savedot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--st-same);margin-right:6px}
+
+/* ---------- 主区 ---------- */
+.main{overflow:auto;min-width:0}
+.wrap{max-width:1180px;margin:0 auto;padding-block:22px 64px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(28px,env(safe-area-inset-right,0px))}
+.topbar{display:none}
+.crumb{font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.crumb a{color:var(--ink-3)}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.phead .q{color:var(--ink-2);margin-top:6px;max-width:68ch}
+.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:7px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;font-size:13px;white-space:nowrap;color:var(--ink)}
+.btn:hover{border-color:var(--ink-3);text-decoration:none}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn.sm{padding:4px 9px;font-size:12.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.sec{margin-top:26px}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.sec-h .sub{color:var(--ink-3);font-size:12.5px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.pad{padding:14px 16px}
+.muted{color:var(--ink-3)}
+.small{font-size:12.5px}
+.tiny{font-size:11.5px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:8px}
+hr.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
+
+/* 标签 */
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;line-height:20px;padding:0 8px;border-radius:4px;white-space:nowrap;font-weight:500}
+.tag::before{content:"";width:6px;height:6px;border-radius:1px;background:currentColor;flex:none}
+.st-store{background:var(--st-store-bg);color:var(--st-store)}
+.st-pend{background:var(--st-pend-bg);color:var(--st-pend)}
+.st-chg{background:var(--st-chg-bg);color:var(--st-chg)}
+.st-same{background:var(--st-same-bg);color:var(--st-same)}
+.st-same::before{border-radius:50%}
+.st-pend::before{transform:rotate(45deg)}
+.demo{display:inline-flex;align-items:center;font-size:11px;line-height:18px;padding:0 6px;border-radius:4px;background:var(--demo-bg);color:var(--demo);white-space:nowrap;font-weight:500}
+.sim{display:inline-flex;align-items:center;font-size:11px;line-height:18px;padding:0 6px;border-radius:4px;border:1px dashed var(--demo);color:var(--demo);white-space:nowrap;font-weight:500}
+.chip{max-width:100%;display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:22px;padding:0 9px;border-radius:11px;background:var(--sunk);color:var(--ink-2);white-space:nowrap}
+.spec{display:inline-flex;align-items:center;font-size:11px;line-height:18px;padding:0 6px;border-radius:4px;background:var(--warn-bg);color:var(--warn);font-weight:500;white-space:nowrap}
+.mark{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;flex:none}
+
+/* 过滤器 */
+.filters{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.fgroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.fgroup .lab{font-size:12px;color:var(--ink-3);margin-right:2px}
+.fbtn{border:1px solid var(--line);background:transparent;border-radius:14px;padding:2px 11px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.fbtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.fbtn:hover:not(.on){border-color:var(--ink-3)}
+
+/* 首页 */
+.hero{padding:40px 0 8px;max-width:760px;margin:0 auto}
+.hero h1{font-size:26px;text-align:center}
+.hero .lead{text-align:center;color:var(--ink-2);margin-top:6px}
+.composer{margin-top:20px;background:var(--panel);border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow);padding:12px 12px 10px}
+.composer textarea{width:100%;border:0;resize:none;background:transparent;min-height:56px;outline:none;font-size:15px;line-height:1.6}
+.composer .row{justify-content:space-between}
+.quick{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.quick button{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:5px 12px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.quick button:hover{border-color:var(--accent);color:var(--accent)}
+.queue{display:flex;flex-direction:column}
+.qrow{display:grid;grid-template-columns:28px minmax(0,1.4fr) minmax(0,1fr) minmax(0,1.3fr) auto;gap:14px;align-items:center;padding:11px 16px;border-top:1px solid var(--line)}
+.qrow:first-child{border-top:0}
+.qrow .why{font-size:12.5px;color:var(--ink-2)}
+.guide{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.gstep{padding:12px 14px}
+.gstep .n{font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+.gstep b{display:block;font-weight:500;margin:2px 0 4px}
+.gstep p{font-size:12.5px;color:var(--ink-2)}
+
+/* 看板 */
+.overview{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.ov h2{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.ov ul{list-style:none;margin:0;padding:4px 0;max-height:250px;overflow:auto}
+.ov li{padding:7px 14px;display:flex;gap:8px;align-items:flex-start;font-size:13px}
+.ov li+li{border-top:1px dashed var(--line)}
+.ov li .when{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);width:44px;flex:none;padding-top:1px}
+.ov .empty{padding:14px;color:var(--ink-3);font-size:12.5px}
+.linkish{background:none;border:0;padding:0;color:inherit;cursor:pointer;text-align:left}
+.linkish:hover{color:var(--accent);text-decoration:underline}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.ccard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;cursor:pointer;transition:border-color .15s}
+.ccard:hover{border-color:var(--ink-3)}
+.ccard .top{display:flex;gap:10px;align-items:center;padding:12px 14px 10px}
+.ccard .nm{font-weight:700}
+.ccard .pc{font-size:12px;color:var(--ink-3)}
+.kv{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.kv div{padding:8px 14px}
+.kv div+div{border-left:1px solid var(--line)}
+.kv .k{font-size:11.5px;color:var(--ink-3)}
+.kv .v{font-family:var(--f-mono);font-size:15px;font-weight:500}
+.kv .d{font-size:11.5px;color:var(--ink-3)}
+.srows{padding:6px 0}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:6px 14px;align-items:center}
+.srow .sn{font-size:13px}
+.srow .sm{grid-column:1/-1;font-size:11.5px;color:var(--ink-3)}
+.ccard .foot{margin-top:auto;padding:8px 14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-3)}
+
+/* 模块 */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{border:0;background:none;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--ink-2);display:flex;gap:8px;align-items:center}
+.tabs button.on{border-bottom-color:var(--ink);color:var(--ink);font-weight:500}
+.branchbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:12px 0}
+.rv{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,1.1fr);gap:0;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);margin-bottom:12px;overflow:hidden}
+.rv>div{padding:12px 14px;min-width:0}
+.rv>div+div{border-left:1px solid var(--line)}
+.rv .colh{font-size:11.5px;color:var(--ink-3);letter-spacing:.04em;margin-bottom:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.notes dt{font-size:11.5px;color:var(--ink-3);margin-top:8px}
+.notes dt:first-child{margin-top:0}
+.notes dd{margin:2px 0 0;white-space:pre-wrap;font-size:13px}
+.aibox{background:var(--sunk);border-radius:6px;padding:10px 12px;white-space:pre-wrap;font-size:13px}
+.miss{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.miss div{font-size:12px;background:var(--warn-bg);color:var(--warn);border-radius:4px;padding:3px 8px}
+.final{border-left:3px solid var(--st-same);padding:6px 10px;background:var(--st-same-bg);border-radius:0 6px 6px 0;white-space:pre-wrap;font-size:13px;color:var(--ink)}
+textarea.ed{width:100%;min-height:170px;border:1px solid var(--line-2);border-radius:6px;padding:8px 10px;background:var(--panel);font-size:13px;line-height:1.6}
+.shots{display:flex;gap:6px;flex-wrap:wrap}
+.shot{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--sunk);cursor:zoom-in;padding:0;display:block}
+.shot img{display:block;width:100%;height:auto}
+.rv .shots .shot{width:80px}
+.rv .shots .shot:only-child{width:120px}
+
+/* 档案时间线 */
+.tl{position:relative;margin-left:8px}
+.tl::before{content:"";position:absolute;left:84px;top:6px;bottom:6px;width:1px;background:var(--line-2)}
+.tli{display:grid;grid-template-columns:76px 18px minmax(0,1fr);gap:0 0;margin-bottom:14px}
+.tli .date{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);text-align:right;padding:12px 8px 0 0}
+.tli .dot{width:11px;height:11px;border-radius:50%;background:var(--panel);border:2px solid var(--ink-3);margin:15px 0 0 3px;position:relative;z-index:1}
+.tli.sel .dot{border-color:var(--accent);background:var(--accent)}
+.tli .body{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px}
+.tli.focus .body{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tli .shots .shot{width:72px}
+.cond{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.cond b{font-family:var(--f-mono);font-weight:500;color:var(--ink)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+.three div{font-size:12.5px;min-width:0}
+.three .k{font-size:11px;color:var(--ink-3);display:flex;gap:4px;align-items:center}
+.abpick{display:flex;gap:4px}
+.abpick button{width:26px;height:24px;border-radius:5px;border:1px solid var(--line-2);background:var(--panel);cursor:pointer;font-family:var(--f-mono);font-size:12px}
+.abpick button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cmpbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:14px}
+
+/* 对比 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cmpcol{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;min-width:0}
+.cmpcond{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--line);background:var(--sunk)}
+.cmpcond div{padding:8px 12px;min-width:0}
+.cmpcond div+div{border-left:1px solid var(--line)}
+.cmpcond .k{font-size:11px;color:var(--ink-3)}
+.cmpcond .v{font-family:var(--f-mono);font-size:13px;font-weight:500;overflow-wrap:anywhere}
+.cmpcond .diff .v{color:var(--st-pend)}
+.cmpshots{display:flex;gap:10px;justify-content:center;padding:16px;background:var(--panel);flex-wrap:wrap}
+.cmpshots .shot{width:min(260px,100%)}
+.cmpshots .shot:not(:only-child){width:min(200px,46%)}
+.cmpnotes{padding:4px 16px 16px}
+.ablabel{font-family:var(--f-mono);font-weight:700;background:var(--ink);color:var(--bg);border-radius:4px;padding:0 7px;font-size:12px}
+
+/* 表单 / 弹窗 */
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.flabel{font-size:12px;color:var(--ink-2);font-weight:500}
+.field .hint{font-size:11.5px;color:var(--ink-3)}
+input[type=text],input[type=date],select,textarea.in{border:1px solid var(--line-2);border-radius:6px;padding:7px 10px;background:var(--panel);font-size:13.5px;width:100%;min-width:0}
+textarea.in{min-height:70px;resize:vertical;line-height:1.55}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.check{display:inline-flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.tgl{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;border:1px solid var(--line-2);border-radius:14px;padding:2px 10px;cursor:pointer;background:var(--panel);user-select:none}
+.tgl input{margin:0}
+.tgl.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.scrim{position:fixed;inset:0;background:rgba(15,20,18,.42);display:flex;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:5vh max(16px,env(safe-area-inset-left,0px)) 5vh max(16px,env(safe-area-inset-right,0px))}
+.modal{background:var(--panel);border-radius:12px;width:min(760px,100%);box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.modal.wide{width:min(980px,100%)}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);gap:12px}
+.mb{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.mf{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.x{border:0;background:none;font-size:20px;cursor:pointer;color:var(--ink-3);line-height:1}
+.drop{border:1.5px dashed var(--line-2);border-radius:8px;padding:14px;text-align:center;color:var(--ink-3);font-size:12.5px;cursor:pointer}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumbs .t{position:relative;width:70px}
+.thumbs .t img{width:70px;height:120px;object-fit:cover;border-radius:5px;border:1px solid var(--line)}
+.thumbs .t button{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);cursor:pointer;font-size:12px;line-height:20px}
+.mx{width:100%;border-collapse:collapse;font-size:13px}
+.mx th,.mx td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:middle}
+.mx th{font-size:11.5px;color:var(--ink-3);font-weight:500;background:var(--sunk)}
+.scroll-x{overflow-x:auto}
+.note{background:var(--accent-soft);color:var(--ink);border-radius:6px;padding:9px 12px;font-size:12.5px}
+.note.warn{background:var(--warn-bg);color:var(--warn)}
+.lightbox img{max-height:80vh;width:auto;max-width:100%;display:block;margin:0 auto;border-radius:8px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:13px;z-index:80;box-shadow:var(--shadow);max-width:90vw}
+.fd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:12px 14px;border-top:1px solid var(--line);align-items:start}
+.fd:first-child{border-top:0}
+.fd .ev{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.evc{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:4px 8px 4px 4px;background:var(--panel);cursor:pointer;font-size:12px;text-align:left}
+.evc:hover{border-color:var(--accent)}
+.evc img{width:26px;height:46px;object-fit:cover;border-radius:3px}
+.ev-full{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;padding:14px 16px;border-top:1px solid var(--line)}
+.ev-full:first-child{border-top:0}
+.ev-full .shots .shot{width:100px}
+.hist{border-left:2px solid var(--line-2);padding-left:12px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.fd.focus{background:var(--accent-soft)}
+.applist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+
+/* 封面式竞品卡片 */
+.ccard.cov{overflow:hidden}
+.cover{position:relative;height:200px;overflow:hidden;background:var(--sunk);border-bottom:1px solid var(--line);padding:14px 30px 0}
+.cover img{display:block;width:100%;height:auto;border-radius:10px 10px 0 0}
+.nocover{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-3);font-size:12.5px}
+.newbadge{position:absolute;top:10px;left:10px;background:var(--st-store);color:var(--panel);font-size:11.5px;font-weight:500;line-height:22px;padding:0 9px;border-radius:11px;box-shadow:var(--shadow);white-space:nowrap}
+.cbody{padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cid{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.cin{min-width:0;flex:1}
+.cname{display:flex;justify-content:space-between;gap:8px;align-items:baseline;min-width:0}
+.cname b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cname span{font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.insight{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--ink-2);margin-top:1px}
+.cmeta{display:flex;gap:5px;flex-wrap:wrap}
+.cmeta .tag{font-size:11px;line-height:19px;padding:0 6px}
+/* 新建项目：场景标签 / 竞品下拉 */
+.sectitle{font-size:14px!important;color:var(--ink)!important;font-weight:700!important}
+.taglist{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.stag{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:15px;background:var(--panel);font-size:12.5px;line-height:26px;overflow:hidden}
+.stag.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.stag button{border:0;background:none;cursor:pointer;color:inherit;padding:0 8px;font-size:14px;line-height:26px}
+.stag .stag-add{color:var(--accent)}
+.stag .stag-add:hover{background:var(--accent-soft)}
+.stag .stag-del{color:var(--ink-3)}
+.stag .stag-del:hover{color:var(--st-pend);background:var(--st-pend-bg)}
+.stag-t{padding:0 12px 0 0}
+.stag-plus{border:1px dashed var(--line-2);background:none;border-radius:15px;padding:0 12px;line-height:26px;font-size:12.5px;color:var(--accent);cursor:pointer}
+.stag-plus:hover{border-color:var(--accent)}
+.stag-new{display:inline-flex;gap:6px;align-items:center}
+.stag-new input{width:140px;padding:4px 8px}
+.combo{position:relative}
+.combo input{padding-right:30px}
+.combo-caret{position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none;font-size:11px}
+.combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;list-style:none;margin:0;padding:4px;background:var(--panel);border:1px solid var(--line-2);border-radius:8px;box-shadow:var(--shadow);max-height:220px;overflow:auto}
+.combo-list li{padding:7px 10px;border-radius:5px;cursor:pointer;font-size:13px}
+.combo-list li.act,.combo-list li:hover{background:var(--sunk)}
+.combo-list li.cur{color:var(--accent);font-weight:500}
+.combo-list li.none{color:var(--ink-3);cursor:default}
+.srcbox{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--sunk);margin-top:-4px}
+.srclist{max-height:196px;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;overscroll-behavior:contain}
+.srcitem{display:grid;grid-template-columns:auto auto auto minmax(0,1fr);gap:8px;align-items:center;padding:8px 10px;border-top:1px solid var(--line);cursor:pointer;font-size:13px}
+.srcitem:first-child{border-top:0}
+.srcitem:hover{background:var(--sunk)}
+.si-n{font-weight:500;white-space:nowrap}
+.si-m{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){.srcitem{grid-template-columns:auto auto minmax(0,1fr)}.si-m{grid-column:2/-1}}
+
+.btn.danger{color:var(--st-pend)}
+.btn.danger:hover{border-color:var(--st-pend)}
+.btn.danger-fill{background:var(--st-pend);border-color:var(--st-pend);color:var(--panel);font-weight:500}
+.btn.danger-fill:hover{filter:brightness(1.08)}
+.cpick{position:absolute;top:10px;left:10px;z-index:2;width:22px;height:22px;border-radius:6px;border:2px solid var(--line-2);background:var(--panel);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--accent-ink);box-shadow:var(--shadow)}
+.ccard.managing:hover .cpick{border-color:var(--accent)}
+.ccard.picked{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ccard.picked .cpick{background:var(--accent);border-color:var(--accent)}
+.ccard.managing .newbadge{left:40px}
+.bulkbar{position:fixed;right:calc(24px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:8px 10px 8px 14px;box-shadow:0 8px 30px rgba(0,0,0,.18);font-size:13px}
+.tli .ops{display:flex;gap:6px;flex:none}
+@media (max-width:1020px){
+  .overview{grid-template-columns:1fr}
+  .rv{grid-template-columns:150px minmax(0,1fr)}
+  .rv>div:nth-child(3){grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}
+  .guide{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;height:auto;min-height:100%}
+  .side{position:fixed;inset:0 auto 0 0;width:min(280px,86vw);z-index:40;transform:translateX(-105%);transition:transform .2s;padding-top:calc(14px + env(safe-area-inset-top,0px))}
+  .side.open{transform:none;box-shadow:var(--shadow)}
+  .topbar{display:flex;align-items:center;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);border-bottom:1px solid var(--line);padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+  .main{overflow:visible}
+  .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .qrow{grid-template-columns:28px minmax(0,1fr) auto}
+  .qrow .hide-s{display:none}
+  .cmp,.grid2,.grid3,.grid4{grid-template-columns:1fr}
+  .cmpcond{grid-template-columns:1fr 1fr}
+  .cmpcond div:nth-child(3){border-left:0}
+  .cmpcond div:nth-child(n+3){border-top:1px solid var(--line)}
+  .three{grid-template-columns:1fr}
+  .tli .body{grid-template-columns:1fr}
+  .tli{grid-template-columns:58px 18px minmax(0,1fr)}
+  .tl::before{left:66px}
+  .ev-full{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .rv{grid-template-columns:1fr}
+  .rv>div+div{border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:520px){.chip{white-space:normal;line-height:1.5;padding:2px 9px}.guide{grid-template-columns:1fr}.hero h1{font-size:22px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app"><aside class="side" id="side" aria-label="项目导航"></aside><main class="main" id="main"></main></div>
+<div id="modal"></div><div id="toast"></div>
+<script>
+// ================= 工具 =================
+const LS_KEY='jingpin-fuchatai-v1';
+const pad2=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const todayISO=()=>iso(new Date());
+const dAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d)};
+const daysBetween=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
+const md=s=>s?s.slice(5).replace('-','.'):'';
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function cmpVer(a,b){const x=String(a||'').split(/[.\-]/).map(n=>parseInt(n,10)||0),y=String(b||'').split(/[.\-]/).map(n=>parseInt(n,10)||0);for(let i=0;i<Math.max(x.length,y.length);i++){const d=(x[i]||0)-(y[i]||0);if(d)return d>0?1:-1}return 0}
+function bumpVer(v){const p=String(v).split('.');p[p.length-1]=String((parseInt(p[p.length-1],10)||0)+1);return p.join('.')}
+
+// ================= 示意截图（SVG 生成） =================
+function phoneSVG(spec,color){
+  const W=200,H=400,X=8,Y=8,SW=184,SH=384;
+  let y=Y+4, out=[], hls=[];
+  const bgSoft=color+'1F';
+  const T=(x,yy,s,size=7,fill='#1b1f1d',anchor='start',w=400)=>`<text x="${x}" y="${yy}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" font-weight="${w}" font-family="PingFang SC,Microsoft YaHei,Noto Sans SC,sans-serif">${h(s)}</text>`;
+  const R=(x,yy,w,hh,fill,r=4,extra='')=>`<rect x="${x}" y="${yy}" width="${w}" height="${hh}" rx="${r}" fill="${fill}" ${extra}/>`;
+  const navH=30, maxY=Y+SH-navH-12;
+  for(const b of spec.blocks){
+    if(y>maxY) break;
+    const y0=y; const L=X+10, CW=SW-20;
+    switch(b.t){
+      case 'status': out.push(T(L,y+8,'9:41',7,'#333','start',700), R(X+SW-34,y+3,18,6,'#333',1.5)); y+=14; break;
+      case 'head': out.push(R(X,y-2,SW,30,color,0), `<circle cx="${L+8}" cy="${y+12}" r="8" fill="#ffffff" opacity=".92"/>`, T(L+8,y+15,b.mark||'',8,color,'middle',700), T(L+22,y+16,b.title,9,'#fff','start',700), `<circle cx="${X+SW-18}" cy="${y+12}" r="4" fill="none" stroke="#fff" stroke-width="1.2"/>`, `<circle cx="${X+SW-32}" cy="${y+12}" r="4" fill="none" stroke="#fff" stroke-width="1.2"/>`); y+=32; break;
+      case 'search': out.push(R(L,y,CW,18,'#ffffff',9,'stroke="#dfe2e6"'), T(L+10,y+12,'🔍︎ '+(b.text||'搜索功能、产品'),6.5,'#9aa0a6')); y+=24; break;
+      case 'tabs': { const n=b.items.length, w=CW/n; b.items.forEach((it,i)=>{ out.push(T(L+w*i+w/2,y+12,it,7.5,i===(b.active||0)?'#111':'#888','middle',i===(b.active||0)?700:400)); if(i===(b.active||0)) out.push(R(L+w*i+w/2-8,y+16,16,2,color,1)); }); y+=24; break; }
+      case 'account': out.push(R(L,y,CW,48,'#ffffff',8,'stroke="#e3e5e8"'), T(L+10,y+14,b.label||'总资产(元)',6.5,'#888'), T(L+10,y+32,b.value||'****.**',13,'#111','start',700), `<ellipse cx="${L+70}" cy="${y+11}" rx="5" ry="3" fill="none" stroke="#999" stroke-width=".9"/>`, T(L+CW-10,y+30,b.right||'资产 ›',7,color,'end',700)); if(b.sub) out.push(T(L+10,y+43,b.sub,5.8,'#999')); y+=54; break;
+      case 'ai': out.push(R(L,y,CW,20,bgSoft,10), T(L+10,y+13,'✦ '+(b.text||'AI 助手'),7,color,'start',700), T(L+CW-10,y+13,'问一问 ›',6.5,'#777','end')); y+=26; break;
+      case 'grid': { const cols=b.cols||5, n=b.n||10, rows=Math.ceil(n/cols), cw=CW/cols; for(let i=0;i<n;i++){const cx=L+cw*(i%cols)+cw/2, cy=y+Math.floor(i/cols)*30+10; out.push(`<rect x="${cx-8}" y="${cy-8}" width="16" height="16" rx="5" fill="${i%3===0?color:bgSoft}" opacity="${i%3===0?.85:1}"/>`, R(cx-9,cy+12,18,3,'#cfd3d8',1.5));} y+=rows*30+4; break; }
+      case 'banner': out.push(R(L,y,CW,b.h||38,b.dark?color:bgSoft,8), T(L+12,y+16,b.text||'活动运营位',8,b.dark?'#fff':color,'start',700), T(L+12,y+28,b.sub||'限时 · 演示素材',6,b.dark?'#ffffffcc':'#888')); y+=(b.h||38)+6; break;
+      case 'section': out.push(T(L,y+10,b.title,8,'#111','start',700), T(L+CW,y+10,'更多 ›',6.2,'#999','end')); y+=16; break;
+      case 'feed': for(let i=0;i<(b.n||2);i++){ out.push(R(L,y,CW,30,'#ffffff',6,'stroke="#e6e8eb"'), R(L+8,y+7,16,16,bgSoft,4), R(L+30,y+8,CW*0.5,4,'#c9cdd2',2), R(L+30,y+17,CW*0.32,3.5,'#dde0e4',2)); y+=35;} break;
+      case 'reco': out.push(R(L,y,CW,b.h||58,'#ffffff',8,'stroke="#e6e8eb"'), T(L+10,y+13,b.text||'为你推荐',7.5,'#111','start',700), T(L+CW-10,y+13,b.tag||'',6,color,'end')); for(let i=0;i<2;i++){out.push(R(L+10,y+20+i*17,CW*0.42,4,'#c9cdd2',2), T(L+CW-10,y+26+i*17,i?'3.10%':'2.85%',7.5,'#d13b2f','end',700));} y+=(b.h||58)+6; break;
+      case 'list': (b.rows||[]).forEach(r=>{ out.push(R(L,y,CW,20,'#ffffff',0), T(L+6,y+13,r[0],7,'#333'), T(L+CW-6,y+13,r[1],7,'#111','end',700), R(L,y+20,CW,.6,'#e5e7ea',0)); y+=21;}); y+=6; break;
+      case 'cards': (b.items||[]).forEach((c,i)=>{ out.push(R(L,y,CW,34,i===0?color:(i===1?'#2f3b4a':'#5b6b78'),7), T(L+10,y+14,c[0],7.5,'#fff','start',700), T(L+10,y+26,c[1],6.5,'#ffffffcc')); y+=38;}); break;
+      case 'chips': { let x=L; (b.items||[]).forEach(c=>{const w=c.length*7+14; out.push(R(x,y,w,16,'#fff',8,'stroke="#e1e4e8"'), T(x+w/2,y+11,c,6.5,'#555','middle')); x+=w+5;}); y+=22; break; }
+      case 'gap': y+=b.h||8; break;
+    }
+    if(b.hl) hls.push({y0:y0-2,y1:y-3,n:b.hl});
+  }
+  hls.forEach(o=>{ out.push(`<rect x="${X+4}" y="${o.y0}" width="${SW-8}" height="${Math.max(10,o.y1-o.y0)}" rx="6" fill="none" stroke="#E8590C" stroke-width="1.6" stroke-dasharray="4 3"/>`, `<circle cx="${X+SW-8}" cy="${o.y0+2}" r="7" fill="#E8590C"/>`, T(X+SW-8,o.y0+5,String(o.n),8,'#fff','middle',700)); });
+  const nav=spec.nav||['首页','财富','生活','我的'];
+  const ny=Y+SH-navH; out.push(R(X,ny,SW,navH,'#ffffff',0), R(X,ny,SW,.7,'#e2e4e7',0));
+  nav.forEach((n,i)=>{const w=SW/nav.length, cx=X+w*i+w/2; out.push(`<circle cx="${cx}" cy="${ny+10}" r="4.5" fill="${i===(spec.navActive||0)?color:'#c4c8cd'}"/>`, T(cx,ny+24,n,6.2,i===(spec.navActive||0)?color:'#888','middle'));});
+  out.push(T(X+SW/2,ny-4,'示意图 · 演示数据',6,'#b0b4b8','middle'));
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W*2}" height="${H*2}"><rect x="1" y="1" width="${W-2}" height="${H-2}" rx="22" fill="#1d2124"/><clipPath id="c"><rect x="${X}" y="${Y}" width="${SW}" height="${SH}" rx="16"/></clipPath><g clip-path="url(#c)"><rect x="${X}" y="${Y}" width="${SW}" height="${SH}" fill="#f3f4f6"/>${out.join('')}</g></svg>`;
+}
+const svgCache={};
+function shotSrc(shot,app){
+  if(shot.kind==='img') return shot.src;
+  const key=(app?app.id:'')+JSON.stringify(shot.spec);
+  if(!svgCache[key]) svgCache[key]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(phoneSVG(shot.spec,app?app.color:'#555'));
+  return svgCache[key];
+}
+
+// ================= 演示数据 =================
+function seedData(){
+  const scenes=[
+    {id:'home',name:'首页信息层级',desc:'首屏模块顺序、宫格数量、运营位与推荐的位置'},
+    {id:'asset',name:'资产入口',desc:'总资产 / 账户入口的位置、展示形式与跳转路径'},
+    {id:'card',name:'卡包页结构',desc:'借记卡、信用卡、电子钱包的分组与快捷操作'},
+  ];
+  const A=(id,name,mark,color,platform,channel,hist)=>({id,name,mark,color,platform,channel,demo:true,store:hist.map(([v,n,note])=>({id:uid('s'),v,d:dAgo(n),note:note||'',src:'演示数据'}))});
+  const apps=[
+    A('xh','星汇银行','星','#C0392B','iOS','App Store',[['13.8.0',85],['14.2.0',34,'首页改版：新增智能助手入口'],['14.3.0',8,'优化首页推荐与资产展示（版本说明摘要）']]),
+    A('at','安泰银行','安','#D9731A','Android','华为应用市场',[['8.4.1',69],['8.6.0',21,'首页新增账户 / 银行 / 财险分栏']]),
+    A('zh','中衡银行','衡','#8E2A4F','iOS','App Store',[['12.3.0',63],['12.4.1',14,'问题修复与性能优化']]),
+    A('gr','工融银行','融','#2D6CB5','HarmonyOS','鸿蒙应用市场',[['11.1.5.0.0',54],['11.2.0.1.0',28,'新增服务卡片，首页模块化运营']]),
+    A('jh','交汇银行','汇','#264E86','Android','应用宝',[['9.0.3',77],['9.1.0',36,'首页与财富页焕新']]),
+    A('yc','邮诚银行','诚','#2E7D4F','iOS','App Store',[['10.4.2',48],['10.5.0',3,'首页新增县域生活专区']]),
+  ];
+  const nav=['首页','财富','生活','我的'];
+  const S1=(blocks,o={})=>({kind:'svg',spec:Object.assign({blocks,nav},o)});
+  const R=(id,app,scene,v,n,shots,changes,feeling,cause,o={})=>{const a=apps.find(x=>x.id===app);return Object.assign({id,app,scene,version:v,platform:a.platform,channel:a.channel,date:dAgo(n),shots,changes,feeling,cause,causeSpec:true,noChange:false,author:'研究员 · 林岚',demo:true,created:dAgo(n)},o)};
+  const head=(t,m)=>({t:'head',title:t,mark:m});
+  const records=[
+    R('r01','xh','home','13.8.0',77,[S1([{t:'status'},head('星汇银行','星'),{t:'search'},{t:'account'},{t:'grid',n:10,cols:5},{t:'banner',text:'秋季理财节'},{t:'feed',n:3}])],
+      '首屏自上而下：搜索、总资产卡片、10 宫格功能入口、运营 banner、资讯流。推荐内容在第三屏才出现。','功能齐全，但首屏偏“功能目录”，找常用功能要靠记忆。','（暂无）',{causeSpec:false}),
+    R('r02','xh','home','14.2.0',27,[S1([{t:'status'},head('星汇银行','星'),{t:'search'},{t:'ai',text:'有问题问小星',hl:1},{t:'account'},{t:'grid',n:8,cols:4,hl:2},{t:'reco',text:'为你推荐',tag:'基于持仓',hl:3},{t:'feed',n:1}])],
+      '搜索栏下新增 AI 助手条；宫格从 10 个缩减为 8 个；第二屏插入基于持仓的产品推荐卡。','首屏更聚焦。AI 助手位置显眼，问“转账限额”能直接给入口。推荐卡与我的持仓相关度较高。','可能用 AI 入口承接长尾功能，从而减少宫格数量；推荐卡位置前移可能与财富转化目标有关。'),
+    R('r03','xh','asset','14.2.0',27,[S1([{t:'status'},head('星汇银行','星'),{t:'search'},{t:'account',right:'资产 ›',hl:1},{t:'grid',n:8,cols:4},{t:'reco'}]),S1([{t:'status'},head('我的资产','星'),{t:'account',label:'总资产(元)',value:'1,286,430.52',sub:'昨日收益 +86.21（演示金额）'},{t:'list',rows:[['活期','12,430.52'],['理财','820,000.00'],['基金','254,000.00'],['保险','200,000.00']]},{t:'section',title:'资产分布'}],{navActive:3})],
+      '资产入口在首页总资产卡片右侧「资产 ›」，点击进入资产页；资产页按活期 / 理财 / 基金 / 保险分层。','两步可达，路径清楚；金额默认隐藏，需点眼睛图标。','（暂无）',{causeSpec:false}),
+    R('r04','at','home','8.4.1',64,[S1([{t:'status'},head('安泰银行','安'),{t:'search'},{t:'grid',n:10,cols:5},{t:'banner',text:'信用卡分期优惠'},{t:'feed',n:3}])],
+      '首页为单一信息流：搜索、10 宫格、banner、资讯流，无顶部分栏。','信息较平，保险与银行业务混在一起。','（暂无）',{causeSpec:false}),
+    R('r05','at','home','8.6.0',16,[S1([{t:'status'},head('安泰银行','安'),{t:'tabs',items:['账户','银行','财险'],hl:1},{t:'account',hl:2},{t:'grid',n:8,cols:4},{t:'banner',text:'车险续保 9 折'},{t:'feed',n:1}])],
+      '首页顶部新增「账户 / 银行 / 财险」分栏；账户分栏首屏为总资产卡片；宫格缩为 8 个。','综合金融的业务边界一目了然；切到财险分栏能直接看到保单。','集团综合金融战略下的交叉销售需要；分栏可减少首页模块之间的争抢。'),
+    R('r06','at','asset','8.6.0',16,[S1([{t:'status'},head('安泰银行','安'),{t:'tabs',items:['账户','银行','财险']},{t:'account',right:'全部资产 ›',hl:1},{t:'grid',n:8,cols:4}]),S1([{t:'status'},head('全部资产','安'),{t:'account',value:'356,920.00'},{t:'list',rows:[['银行存款','56,920.00'],['理财','200,000.00'],['保险保单','3 份'],['医健账户','已开通']]}],{navActive:3})],
+      '资产入口从「我的」页移到首页「账户」分栏首屏；资产页新增保险保单与医健账户。','入口更近，资产口径更“全”，但需要理解“医健账户”是什么。','可能为配合首页分栏改版，把账户视角前置。'),
+    R('r07','zh','home','12.3.0',56,[S1([{t:'status'},head('中衡银行','衡'),{t:'search'},{t:'account'},{t:'grid',n:10,cols:5},{t:'section',title:'投资三步走'},{t:'feed',n:2}])],
+      '首屏：搜索、总资产、10 宫格、「投资三步走」专区（投什么 / 怎么投 / 投一笔）、资讯流。','专区引导清楚，但与宫格中的“理财”入口有重复。','（暂无）',{causeSpec:false}),
+    R('r08','zh','home','12.4.1',11,[S1([{t:'status'},head('中衡银行','衡'),{t:'search'},{t:'account'},{t:'grid',n:10,cols:5},{t:'section',title:'投资三步走'},{t:'feed',n:2}])],
+      '与 12.3.0 对照复查：模块顺序、宫格数量、专区位置均一致，仅 banner 素材更换。','无明显体验差异。','',{noChange:true,causeSpec:false}),
+    R('r16','zh','asset','12.3.0',56,[S1([{t:'status'},head('中衡银行','衡'),{t:'search'},{t:'account',right:'我的资产 ›',hl:1},{t:'grid',n:10,cols:5}])],
+      '资产入口位于首页总资产卡片右侧「我的资产 ›」。','路径短，文案清楚。','（暂无）',{causeSpec:false}),
+    R('r09','zh','asset','12.4.1',11,[S1([{t:'status'},head('中衡银行','衡'),{t:'search'},{t:'account',right:'我的资产 ›',hl:1},{t:'grid',n:10,cols:5}])],
+      '复查资产入口：位置、文案与跳转路径同 12.3.0。','无变化。','',{noChange:true,causeSpec:false}),
+    R('r10','gr','home','11.1.5.0.0',48,[S1([{t:'status'},head('工融银行','融'),{t:'search'},{t:'grid',n:10,cols:5},{t:'banner',text:'年终奖理财季',dark:true},{t:'account',hl:1},{t:'feed',n:2}])],
+      '首页：搜索、10 宫格、大幅运营 banner，总资产卡片下沉到 banner 之后。','资产信息被运营位压在下面，需要滑动。','运营位优先级高于账户信息，可能与季度营销节点有关。'),
+    R('r11','jh','home','9.1.0',24,[S1([{t:'status'},head('交汇银行','汇'),{t:'search'},{t:'account'},{t:'ai',text:'小汇帮你办',hl:1},{t:'grid',n:5,cols:5,hl:2},{t:'reco',text:'猜你想买',tag:'千人千面'},{t:'feed',n:1}])],
+      '首屏宫格缩为单行 5 个，下方为 AI 办事入口和“猜你想买”推荐卡。','首页明显“变轻”，但部分常用功能被收进「全部」，需要多点一次。','可能以 AI 与个性化推荐替代固定功能入口。'),
+    R('r12','jh','asset','9.1.0',24,[S1([{t:'status'},head('交汇银行','汇'),{t:'search'},{t:'account',right:'资产分析 ›',hl:1},{t:'ai',text:'小汇帮你办'},{t:'grid',n:5,cols:5}])],
+      '资产卡片右侧入口文案由「我的资产」改为「资产分析」，点击进入带收益分析的资产页。','入口位置未动，但文案更偏“分析”，点进去信息更多。','（推测）想把资产页从“查看”转向“诊断”，带动配置建议。'),
+    R('r13','yc','asset','10.4.2',41,[S1([{t:'status'},head('邮诚银行','诚'),{t:'search'},{t:'grid',n:10,cols:5},{t:'account',right:'资产 ›',hl:1},{t:'feed',n:2}])],
+      '资产卡片位于宫格之下，右侧「资产 ›」进入资产页。','位置偏下，但老年用户模式下会前置。','（暂无）',{causeSpec:false}),
+    R('r14','yc','home','10.5.0',2,[S1([{t:'status'},head('邮诚银行','诚'),{t:'search'},{t:'grid',n:10,cols:5},{t:'section',title:'县域生活',hl:1},{t:'chips',items:['助农','缴费','社保']},{t:'account'},{t:'feed',n:1}])],
+      '宫格下方新增「县域生活」专区（助农 / 缴费 / 社保），总资产卡片继续下移。','专区和客群匹配，但首屏资产信息更难看到。','可能面向县域客群强化生活场景。'),
+    R('r15','at','card','8.6.0',16,[S1([{t:'status'},head('卡包','安'),{t:'tabs',items:['借记卡','信用卡','电子钱包']},{t:'cards',items:[['借记卡 ·· 6621','一类户 · 默认收款'],['信用卡 ·· 0937','本期待还 2,340.00（演示）'],['电子钱包','数字人民币 · 已开通']]},{t:'list',rows:[['快捷操作','转账 / 还款 / 冻结']]}],{navActive:3})],
+      '卡包按借记卡 / 信用卡 / 电子钱包分栏，卡片下方集中放快捷操作。','分组清楚，信用卡待还金额直接可见。','（暂无）',{causeSpec:false}),
+  ];
+  const ref=(rid,scene,via)=>({rid,scene,active:true,added:dAgo(10),via:via||''});
+  const recSuggest={}; // 预置 AI 结果
+  const pa={id:'pa',group:'银行产品',name:'首页',created:dAgo(70),
+    role:'手机银行产品经理（某股份制银行零售条线）',
+    question:'同业手机银行首页如何调整信息层级？资产入口放在哪里、是否前置？',
+    scenes:['home','asset'],dims:['信息层级','入口位置','AI 融入方式','个性化推荐','运营位密度'],
+    apps:apps.map(a=>({id:a.id,scenes:['home','asset']})),
+    refs:['r01','r02','r03','r04','r05','r06','r07','r08','r16','r09','r10','r11','r12','r13','r14'].map(id=>{const r=records.find(x=>x.id===id);return ref(id,r.scene)}),
+    flags:{'jh|asset':{note:'研究员标记：入口文案疑似灰度测试，需换账号复查',at:dAgo(6)}},
+    gaps:{'gr|asset':true},
+    reviews:{}, findings:[], history:[]};
+  const pb={id:'pb',group:'银行产品',name:'卡包页',created:dAgo(9),
+    role:'手机银行产品经理（某股份制银行零售条线）',
+    question:'卡包页如何组织借记卡、信用卡与电子钱包？用户从资产入口到卡包要走几步？',
+    scenes:['asset','card'],dims:['卡片分组','资产入口路径','快捷操作'],
+    origin:{from:'pa',note:'由「首页」项目复用 4 个竞品模块与资产入口记录，卡包页场景待补采'},
+    apps:['xh','at','zh','jh'].map(id=>({id,scenes:['asset','card']})),
+    refs:[ref('r03','asset','pa'),ref('r06','asset','pa'),ref('r09','asset','pa'),ref('r12','asset','pa'),ref('r15','card')],
+    flags:{}, gaps:{'xh|card':true,'zh|card':true,'jh|card':true}, reviews:{}, findings:[], history:[]};
+  const st={v:1,seededAt:todayISO(),scenes,apps,records,projects:[pa,pb]};
+  // 预置审阅与发现（演示）
+  for(const rid of ['r02','r05','r06','r11','r08']){const r=records.find(x=>x.id===rid); pa.reviews[rid]={sug:aiSuggest(r,pa,st),state:'pending',demo:true};}
+  pa.reviews.r05.state='adopted'; pa.reviews.r05.final=pa.reviews.r05.sug.text; pa.reviews.r05.at=dAgo(12);
+  pa.reviews.r06.state='edited'; pa.reviews.r06.final='结论：安泰银行把资产入口前置到首页「账户」分栏首屏。\n观察到的变化：\n· [入口位置] 资产入口由「我的」页移至首页「账户」分栏首屏\n· [信息层级] 资产页新增保险保单、医健账户\n使用感受：入口更近、资产口径更全；“医健账户”需要解释。\n可能原因（推测）：配合首页分栏改版，前置账户视角。'; pa.reviews.r06.at=dAgo(12);
+  pa.reviews.r02.state='adopted'; pa.reviews.r02.final=pa.reviews.r02.sug.text; pa.reviews.r02.at=dAgo(10);
+  pa.reviews.r11.state='adopted'; pa.reviews.r11.final=pa.reviews.r11.sug.text; pa.reviews.r11.at=dAgo(9);
+  pa.reviews.r08.state='kept'; pa.reviews.r08.final=originalText(records.find(x=>x.id==='r08')); pa.reviews.r08.at=dAgo(8);
+  pa.findings.push({id:'f01',type:'single',status:'confirmed',title:'安泰银行将资产入口前置到首页「账户」分栏',body:'8.6.0 版本首页新增账户 / 银行 / 财险分栏，资产入口从「我的」页移到「账户」分栏首屏；资产页口径扩展到保单与医健账户。',rids:['r05','r06'],apps:['at'],scene:'asset',created:dAgo(11),confirmed:dAgo(11),demo:true});
+  pa.findings.push({id:'f02',type:'trend',status:'candidate',title:'首屏宫格收缩，由 AI 助手或分栏承接功能入口',body:'星汇（10→8）、安泰（10→8，新增分栏）、交汇（10→5，新增 AI 办事）三家在近两个版本都减少了首屏宫格。',rids:['r02','r05','r11'],apps:['xh','at','jh'],scene:'home',created:dAgo(8),demo:true});
+  return st;
+}
+
+// ================= 模拟 AI 整理 =================
+const DIM_RULES=[[/入口|按钮|跳转|文案|路径|›/,'入口位置'],[/AI|助手|智能/,'AI 融入方式'],[/推荐|个性化|千人千面|持仓|客群/,'个性化推荐'],[/banner|运营|活动|专区/,'运营位密度'],[/宫格|模块|首屏|顺序|分栏|分层|下沉|下移|层级|信息流/,'信息层级'],[/卡包|借记卡|信用卡|钱包/,'卡片分组'],[/快捷/,'快捷操作']];
+function guessDim(t){for(const [re,d] of DIM_RULES) if(re.test(t)) return d; return '其他'}
+function splitSent(t){return String(t||'').split(/[；;。\n]/).map(s=>s.trim()).filter(Boolean)}
+function originalText(r){
+  return `观察到的变化：${r.noChange?'（复查后未发现明显变化）':''}${r.changes||'—'}\n使用感受：${r.feeling||'—'}\n可能原因${r.causeSpec?'（推测）':''}：${r.cause||'—'}`;
+}
+function aiSuggest(r,p,st){
+  st=st||S; const app=st.apps.find(a=>a.id===r.app); const sc=(st.scenes.find(s=>s.id===r.scene)||{}).name||r.scene;
+  const parts=splitSent(r.changes);
+  const bullets=r.noChange?['· [无变化] '+(parts[0]||'复查未发现明显变化')]:parts.map(s=>`· [${guessDim(s)}] ${s}`);
+  const lead=r.noChange?`与上一版本一致，未发现明显变化（${app.name} ${r.version} · ${sc}）。`:`${parts[0]||'—'}${parts.length>1?`，另有 ${parts.length-1} 处变化`:''}（${app.name} ${r.version} · ${r.platform} · ${sc}）。`;
+  const feel=splitSent(r.feeling).join('；');
+  const hasCause=r.cause&&!/^（?暂无）?$/.test(r.cause.trim());
+  let text=`结论：${lead}\n观察到的变化：\n${bullets.join('\n')}\n使用感受：${feel||'—'}`;
+  if(hasCause) text+=`\n可能原因（推测）：${r.cause.replace(/^（推测）/,'')}`;
+  const miss=[];
+  const sameScene=st.records.filter(x=>x.app===r.app&&x.scene===r.scene&&x.id!==r.id&&x.date<=r.date);
+  if(!r.shots||!r.shots.length) miss.push('缺少截图证据：结论无法回看，建议补传截图');
+  if(!sameScene.length) miss.push(r.noChange?'标为“无变化”，但档案中没有同场景的上一版本记录可对照':'档案中没有同场景的更早记录，无法确认“变化”是相对哪一版');
+  if(hasCause&&r.causeSpec) miss.push('“可能原因”缺少版本说明、公告或报道等依据，保留推测标记');
+  if(!r.channel) miss.push('未记录下载渠道');
+  if(r.shots&&r.shots.length===1&&r.scene==='asset') miss.push('资产入口场景只有一张图，建议补一张点击后的落地页');
+  const dims=[...new Set(parts.map(guessDim))].filter(d=>d!=='其他');
+  return {text,miss,dims,spec:hasCause,at:todayISO()};
+}
+
+// ================= 状态与持久化 =================
+let S=null, MEM=null;
+const UI={manage:{},filters:{},branch:{},ab:{},archScene:{},editing:{},focus:null,modal:null,wiz:null,scope:{},rescope:{},savedAt:null,lastRoute:'',sideOpen:false,newFinding:null,toast:null};
+function load(){
+  let raw=null; try{raw=localStorage.getItem(LS_KEY)}catch(e){}
+  if(raw){try{S=JSON.parse(raw);if(S&&S.v===1){UI.savedAt=S._savedAt||null;if(migrate())save(true);return}}catch(e){}}
+  S=seedData(); migrate(); save(true);
+}
+function migrate(){let ch=false;
+  if(!Array.isArray(S.sceneTags)){S.sceneTags=S.scenes.slice(0,6).map(x=>x.name);ch=true}
+  S.projects.forEach(p=>{if(!p.seen){p.seen={};ch=true}});
+  if(!S.m2){S.projects.forEach(p=>Object.entries(p.reviews).forEach(([rid,rv])=>{const r=S.records.find(x=>x.id===rid);if(rv.demo&&r){rv.sug=aiSuggest(r,p,S);if(rv.state==='adopted')rv.final=rv.sug.text}}));S.m2=true;ch=true}
+  return ch}
+function insightOf(p,r){if(!r)return null;const rv=p.reviews[r.id];const rev=rv&&(rv.state==='adopted'||rv.state==='edited')&&rv.final;
+  if(r.noChange&&!rev)return {r,first:'复查后未发现明显变化',full:r.changes||''};
+  let t=rev?rv.final.split('\n')[0]:r.changes;t=String(t||'').replace(/^(结论|观察到的变化)[^：]*：/,'').trim()||r.changes||'';
+  let first=(t.split(/[，,；;。]/).map(x=>x.trim()).filter(Boolean)[0])||t;const m=first.match(/^([^：:]{1,4})[：:](.+)$/);if(m)first=m[2].trim();
+  return {r,first,full:t}}
+function save(silent){
+  S._savedAt=new Date().toISOString();
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S));UI.savedAt=S._savedAt;UI.storeOK=true}
+  catch(e){UI.storeOK=false; if(!silent) toast('浏览器存储空间不足或不可用：本次修改只保存在当前页面。可删除部分上传截图后再试。')}
+}
+const APP=id=>S.apps.find(a=>a.id===id);
+const REC=id=>S.records.find(r=>r.id===id);
+const PROJ=id=>S.projects.find(p=>p.id===id);
+const SC=id=>(S.scenes.find(s=>s.id===id)||{name:id}).name;
+const storeLatest=a=>a.store.slice().sort((x,y)=>cmpVer(y.v,x.v)||(y.d>x.d?1:-1))[0];
+const byDate=(x,y)=>(y.date>x.date?1:y.date<x.date?-1:cmpVer(y.version,x.version));
+const STATUS={store:{label:'商店有新版本',cls:'st-store',rank:0},pend:{label:'场景待复查',cls:'st-pend',rank:1},chg:{label:'已复查，有变化',cls:'st-chg',rank:2},same:{label:'已复查，无明显变化',cls:'st-same',rank:3}};
+const tag=k=>`<span class="tag ${STATUS[k].cls}">${STATUS[k].label}</span>`;
+const DEMO='<span class="demo">演示数据</span>';
+const SIM='<span class="sim">模拟 AI · 非真实模型</span>';
+function activeRecs(p,appId,scene){return p.refs.filter(f=>f.active&&f.scene===scene).map(f=>REC(f.rid)).filter(r=>r&&r.app===appId).sort(byDate)}
+function projScenes(p,appId){const e=p.apps.find(a=>a.id===appId);return e?e.scenes.filter(s=>p.scenes.includes(s)):[]}
+function statusOf(p,appId,scene){
+  const recs=activeRecs(p,appId,scene), latest=recs[0], sv=storeLatest(APP(appId)), k=appId+'|'+scene;
+  const mk=(key,reason)=>({key,reason,latest,...STATUS[key]});
+  if(!latest) return mk('pend',p.gaps[k]?'需补采：本项目该场景尚无适用记录':'尚无适用记录');
+  if(sv&&cmpVer(sv.v,latest.version)>0) return mk('store',`商店 ${sv.v}（${md(sv.d)}）新于实测 ${latest.version}`);
+  if(p.flags[k]) return mk('pend',p.flags[k].note);
+  return latest.noChange?mk('same',`${latest.version} 于 ${md(latest.date)} 复查，未见明显变化`):mk('chg',`${latest.version} 于 ${md(latest.date)} 复查，记录了变化`);
+}
+function pairs(p){const out=[];for(const a of p.apps){if(!APP(a.id))continue;for(const s of projScenes(p,a.id))out.push({app:a.id,scene:s,st:statusOf(p,a.id,s)})}return out}
+const needCount=p=>pairs(p).filter(x=>x.st.key==='store'||x.st.key==='pend').length;
+function shotsHTML(r,n){const a=APP(r.app);const list=(r.shots||[]).slice(0,n||9);if(!list.length)return '<div class="tiny muted">无截图</div>';return `<div class="shots">${list.map((s,i)=>`<button class="shot" data-act="img" data-rid="${r.id}" data-i="${i}" aria-label="放大截图"><img alt="${h(a.name+' '+r.version+' 截图'+(i+1))}" src="${shotSrc(s,a)}" loading="lazy"></button>`).join('')}</div>`}
+function markHTML(a,size){return `<span class="mark" style="background:${a.color}${size?`;width:${size}px;height:${size}px`:''}">${h(a.mark)}</span>`}
+function toast(msg){UI.toast=msg;renderToast();clearTimeout(UI._tt);UI._tt=setTimeout(()=>{UI.toast=null;renderToast()},3200)}
+function renderToast(){let el=document.getElementById('toast');el.innerHTML=UI.toast?`<div class="toast" role="status">${h(UI.toast)}</div>`:''}
+
+// ================= 路由 =================
+function route(){const r=(location.hash||'#home').slice(1)||'home';const [v,...rest]=r.split('-');return {v,a:rest[0],b:rest[1],raw:r}}
+function go(hash){if(('#'+hash)===location.hash)render();else location.hash=hash}
+window.addEventListener('hashchange',()=>{UI.sideOpen=false;UI.manage={};render()});
+
+// ================= 侧栏 =================
+function sidebar(R){
+  const groups={};S.projects.forEach(p=>(groups[p.group]=groups[p.group]||[]).push(p));
+  const curP=['project','module','scope','rescope','findings','finding'].includes(R.v)?R.a:null;
+  const t=UI.savedAt?new Date(UI.savedAt):null;
+  return `<div class="brand"><span class="logo">观</span>观微<small>原型</small></div>
+  <button class="newbtn" data-act="new-project"><span class="plus">＋</span>新建调研项目</button>
+  <nav class="snav"><a href="#home" class="${R.v==='home'?'on':''}">首页 · 复查队列</a><a href="#archive" class="${['archive','compare'].includes(R.v)?'on':''}">竞品档案 <span class="tiny muted">${S.apps.length} 款</span></a></nav>
+  <div class="sgroup"><div class="glabel">调研项目</div>
+  ${Object.entries(groups).map(([g,ps])=>`<div class="gname">${h(g)}</div><div class="sproj">${ps.map(p=>{const n=needCount(p);return `<a href="#project-${p.id}" class="${curP===p.id?'on':''}"><span>${h(g)}-${h(p.name)}</span>${n?`<span class="cnt" title="待复查 ${n} 个场景">${n}</span>`:''}</a>`}).join('')}</div>`).join('')}
+  </div>
+  <div class="sfoot"><span>${UI.storeOK===false?'<i class="savedot" style="background:var(--st-pend)"></i>未能写入浏览器存储':`<i class="savedot"></i>已保存到本浏览器${t?' · '+pad2(t.getHours())+':'+pad2(t.getMinutes()):''}`}</span>
+  <span>App、版本、商店更新与 AI 输出均为虚构演示数据</span><button data-act="reset">重置演示数据</button></div>`;
+}
+
+// ================= 首页 =================
+function queueItems(){
+  const map={};
+  for(const p of S.projects) for(const x of pairs(p)){ if(x.st.key!=='store'&&x.st.key!=='pend') continue; const k=x.app+'|'+x.scene; (map[k]=map[k]||{app:x.app,scene:x.scene,st:x.st,ps:[]}).ps.push(p); if(x.st.rank<map[k].st.rank) map[k].st=x.st; }
+  return Object.values(map).sort((a,b)=>a.st.rank-b.st.rank||((storeLatest(APP(b.app)).d>storeLatest(APP(a.app)).d)?1:-1));
+}
+function viewHome(){
+  const q=queueItems();
+  return `<div class="wrap">
+  <section class="hero">
+    <h1>每一次观察，都有迹可循。</h1>
+    <p class="lead">观微按商店更新与项目范围，整理出下面的复查队列。也可以直接写下新的调研问题，建一个监测项目。</p>
+    <div class="composer"><label class="flabel" for="composer" style="display:block;margin-bottom:2px">新建竞品监测项目</label>
+      <textarea id="composer" rows="2" placeholder="写下研究问题，例如：同业 App 的理财页如何呈现收益与风险提示？"></textarea>
+      <div class="row"><span class="tiny muted">回车创建 · Shift+回车换行</span><button class="btn pri" data-act="compose-create">创建监测项目</button></div>
+    </div>
+    <div class="quick"><button data-act="quick-example">示例：从「首页」项目切换到「卡包页」</button><button data-act="store-form">登记一次商店更新（模拟）</button><button data-act="go" data-to="archive">浏览竞品档案</button></div>
+  </section>
+  <section class="sec"><div class="sec-h"><h2>接下来该复查什么 <span class="muted small">${q.length} 个场景</span></h2><span class="sub">按「商店有新版本」优先，其次是「场景待复查」</span></div>
+    <div class="panel queue">${q.length?q.slice(0,10).map(x=>{const a=APP(x.app),sv=storeLatest(a);return `<div class="qrow">${markHTML(a)}<div><b>${h(a.name)}</b> · ${h(SC(x.scene))}<div class="tiny muted">${h(a.platform)} · ${h(a.channel)} · 商店 <span class="mono">${h(sv.v)}</span></div></div><div>${tag(x.st.key)}</div><div class="why hide-s">${h(x.st.reason)}<div class="tiny muted">项目：${x.ps.map(p=>h(p.group+'-'+p.name)).join('、')}</div></div><button class="btn sm" data-act="go" data-to="module-${x.ps[0].id}-${x.app}" data-branch="${x.scene}">开始复查</button></div>`}).join(''):'<div class="pad muted">暂无待复查场景。</div>'}</div>
+  </section>
+  <section class="sec"><div class="sec-h"><h2>怎么用</h2><span class="sub">第一版不接真实商店接口，体验、截图与结论由研究员完成</span></div>
+    <div class="guide">
+      <div class="panel gstep"><span class="n">第 1 步</span><b>建项目、定范围</b><p>写客户角色与研究问题，勾选业务场景和观察维度。</p></div>
+      <div class="panel gstep"><span class="n">第 2 步</span><b>复用竞品模块</b><p>从过往项目选 App 与板块，自动引用档案里的同场景记录，缺的标为需补采。</p></div>
+      <div class="panel gstep"><span class="n">第 3 步</span><b>亲自体验并登记</b><p>商店有新版本时实测，上传截图，分开写变化、感受与可能原因。</p></div>
+      <div class="panel gstep"><span class="n">第 4 步</span><b>审阅、确认发现</b><p>模拟 AI 先整理，研究员保留原文或采纳 / 编辑，发现可回溯到截图。</p></div>
+    </div>
+  </section></div>`;
+}
+
+// ================= 项目看板 =================
+function viewProject(p){
+  const today=todayISO();
+  const ups=[];p.apps.forEach(e=>{const a=APP(e.id);if(!a)return;a.store.forEach(s=>{const d=daysBetween(s.d,today);if(d>=0&&d<=30)ups.push({a,s})})});
+  ups.sort((x,y)=>y.s.d>x.s.d?1:-1);
+  const ps=pairs(p); const todo=ps.filter(x=>x.st.key==='store'||x.st.key==='pend').sort((a,b)=>a.st.rank-b.st.rank);
+  const conf=p.findings.filter(f=>f.status==='confirmed').sort((a,b)=>(b.confirmed||'')>(a.confirmed||'')?1:-1);
+  const cand=p.findings.filter(f=>f.status==='candidate').length;
+  const F=UI.filters[p.id]||(UI.filters[p.id]={scene:'all',status:'all'});
+  const tested=a=>{let best=null;for(const s of projScenes(p,a)){const r=activeRecs(p,a,s)[0];if(r&&(!best||byDate(best,r)>0))best=r}return best};
+  const cardRecs=appId=>{let list=[];for(const s of projScenes(p,appId)){if(F.scene!=='all'&&s!==F.scene)continue;list=list.concat(activeRecs(p,appId,s))}return list.sort(byDate)};
+  const cards=p.apps.filter(e=>APP(e.id)).map(e=>{
+    const a=APP(e.id),sv=storeLatest(a),t=tested(e.id);
+    let rows=projScenes(p,e.id).map(s=>({s,st:statusOf(p,e.id,s)}));
+    if(F.scene!=='all') rows=rows.filter(x=>x.s===F.scene);
+    if(F.status!=='all') rows=rows.filter(x=>x.st.key===F.status);
+    if(!rows.length) return '';
+    const recs=cardRecs(e.id), cov=recs.find(r=>r.shots&&r.shots.length), ins=insightOf(p,recs[0]);
+    const unseen=sv&&(!t||cmpVer(sv.v,t.version)>0)&&(p.seen||{})[a.id]!==sv.v;
+    const mg=UI.manage[p.id], picked=mg&&mg.includes(a.id);
+    return `<article class="ccard cov ${mg?'managing':''} ${picked?'picked':''}" ${mg?`data-act="card-pick" data-pid="${p.id}" data-app="${a.id}" role="checkbox" aria-checked="${picked?'true':'false'}" aria-label="选择 ${h(a.name)}"`:`data-act="go" data-to="module-${p.id}-${a.id}" role="link" aria-label="打开 ${h(a.name)} 竞品模块${unseen?'（有未查看的新版本）':''}"`} tabindex="0">
+      <div class="cover">${mg?`<span class="cpick" aria-hidden="true">${picked?'✓':''}</span>`:''}${cov?`<img alt="${h(a.name)} ${h(cov.version)} 最新截图" src="${shotSrc(cov.shots[0],a)}" loading="lazy">`:'<div class="nocover">暂无截图</div>'}${unseen?`<span class="newbadge">新版本 ${h(sv.v)} · 未查看</span>`:''}</div>
+      <div class="cbody"><div class="cid">${markHTML(a,30)}<div class="cin"><div class="cname"><b>${h(a.name)}</b><span>${ins?'最近洞察 · '+md(ins.r.date):'尚无洞察'}</span></div><p class="insight" title="${h(ins?ins.full:'')}">${ins?h(ins.first):'还没有体验记录'}</p></div></div>
+      <div class="cmeta">${rows.map(x=>`<span class="tag ${x.st.cls}" title="${h(x.st.reason)}">${h(SC(x.s))} · ${x.st.label}</span>`).join('')}</div></div></article>`}).join('');
+  const excluded=p.refs.filter(f=>!f.active&&REC(f.rid));
+  return `<div class="wrap">
+  <div class="crumb"><a href="#home">首页</a>/<span>${h(p.group)}</span>/<span>${h(p.name)}</span></div>
+  <div class="phead"><div style="min-width:0"><h1>${h(p.group)}-${h(p.name)}</h1><p class="q"><b>研究问题：</b>${h(p.question)}</p>
+    <div class="row small" style="margin-top:8px"><span class="chip">客户角色：${h(p.role)}</span><span class="chip">产品类型：${h(p.group)}</span>${p.scenes.map(s=>`<span class="chip">场景：${h(SC(s))}</span>`).join('')}<span class="chip">维度：${h(p.dims.join(' / '))}</span></div>
+    ${p.origin?`<p class="small muted" style="margin-top:6px">来源：${h(p.origin.note)}（<a href="#project-${p.origin.from}">查看来源项目</a>）</p>`:''}
+  </div>
+  <div class="acts"><button class="btn" data-act="go" data-to="scope-${p.id}">编辑项目范围</button><button class="btn" data-act="go" data-to="rescope-${p.id}">调整引用</button><button class="btn" data-act="store-form">登记商店更新（模拟）</button><button class="btn pri" data-act="go" data-to="findings-${p.id}">项目汇总 · ${conf.length} 条发现</button></div></div>
+  ${p.history.length?`<div class="note" style="margin-bottom:14px">研究问题已于 ${md(p.history[p.history.length-1].at)} 修改，修改前引用的材料仍保留${excluded.length?`，其中 ${excluded.length} 条暂不适用新范围`:''}。<a href="#rescope-${p.id}">查看并重新选择 →</a></div>`:''}
+  <div class="overview">
+    <section class="panel ov"><h2>近 30 天版本更新 <span class="muted tiny">${ups.length} 次 · 手动登记 / 演示</span></h2>${ups.length?`<ul>${ups.map(({a,s})=>{const t=tested(a.id);const un=!t||cmpVer(s.v,t.version)>0;return `<li><span class="when">${md(s.d)}</span><div style="min-width:0"><button class="linkish" data-act="go" data-to="module-${p.id}-${a.id}"><b>${h(a.name)}</b> <span class="mono">${h(s.v)}</span></button> ${un?'<span class="tag st-store">未实测</span>':''}<div class="tiny muted">${h(s.note||'无版本说明')} · ${h(s.src)}</div></div></li>`}).join('')}</ul>`:'<div class="empty">近 30 天没有登记的商店更新。</div>'}</section>
+    <section class="panel ov"><h2>待复查场景 <span class="muted tiny">${todo.length} 个</span></h2>${todo.length?`<ul>${todo.map(x=>`<li><div style="min-width:0;flex:1"><button class="linkish" data-act="go" data-to="module-${p.id}-${x.app}" data-branch="${x.scene}"><b>${h(APP(x.app).name)}</b> · ${h(SC(x.scene))}</button><div class="tiny muted">${h(x.st.reason)}</div></div>${tag(x.st.key)}</li>`).join('')}</ul>`:'<div class="empty">所有场景都已复查。</div>'}</section>
+    <section class="panel ov"><h2>最近确认的发现 <span class="muted tiny">${cand?`另有 ${cand} 条候选`:''}</span></h2>${conf.length?`<ul>${conf.slice(0,5).map(f=>`<li><span class="when">${md(f.confirmed||f.created)}</span><div style="min-width:0"><button class="linkish" data-act="go" data-to="finding-${p.id}-${f.id}">${h(f.title)}</button><div class="tiny muted">${f.type==='trend'?'跨产品趋势':'单品发现'} · ${f.rids.length} 条证据 ${f.demo?'· 演示':''}</div></div></li>`).join('')}</ul>`:'<div class="empty">还没有确认的发现。在竞品模块里审阅记录后可创建。</div>'}</section>
+  </div>
+  <section class="sec"><div class="sec-h"><div class="row" style="gap:12px"><h2>竞品卡片 <span class="muted small">${p.apps.filter(e=>APP(e.id)).length}</span></h2><span class="sub">${UI.manage[p.id]?'点选要从本项目移除的竞品卡片':'点击卡片进入该 App 在本项目中的调研分支'}</span></div>
+  <div class="acts"><button class="btn sm ${UI.manage[p.id]?'pri':''}" data-act="card-manage" data-pid="${p.id}">${UI.manage[p.id]?'完成管理':'管理'}</button><button class="btn sm" data-act="card-new" data-pid="${p.id}">＋ 新建竞品卡片</button></div></div>
+  <div class="filters"><div class="fgroup"><span class="lab">场景</span>${[['all','全部'],...p.scenes.map(s=>[s,SC(s)])].map(([k,l])=>`<button class="fbtn ${F.scene===k?'on':''}" data-act="filter" data-pid="${p.id}" data-k="scene" data-v="${k}">${h(l)}</button>`).join('')}</div>
+  <div class="fgroup"><span class="lab">复查状态</span>${[['all','全部'],...Object.entries(STATUS).map(([k,v])=>[k,v.label])].map(([k,l])=>`<button class="fbtn ${F.status===k?'on':''}" data-act="filter" data-pid="${p.id}" data-k="status" data-v="${k}">${h(l)}${k!=='all'?` <span class="mono tiny">${ps.filter(x=>x.st.key===k&&(F.scene==='all'||x.scene===F.scene)).length}</span>`:''}</button>`).join('')}</div></div>
+  <div class="cards" style="margin-top:12px">${cards||`<div class="panel pad muted">${p.apps.length?'没有符合筛选条件的竞品场景。':'本项目还没有竞品卡片。点右上角「新建竞品卡片」添加。'}</div>`}</div></section>
+  ${UI.manage[p.id]&&UI.manage[p.id].length?`<div class="bulkbar" role="region" aria-label="批量操作"><span>已选 <b>${UI.manage[p.id].length}</b> 个竞品</span><button class="btn sm" data-act="card-clear" data-pid="${p.id}">取消选择</button><button class="btn sm danger-fill" data-act="card-del" data-pid="${p.id}">删除</button></div>`:''}
+  ${excluded.length?`<section class="sec"><div class="sec-h"><h2>先前引用的材料（当前范围外）</h2><span class="sub">原始档案保留，可在「调整引用」中重新启用</span></div><div class="panel pad row">${excluded.map(f=>evChip(REC(f.rid),`archive-${REC(f.rid).app}`)).join('')}</div></section>`:''}
+  </div>`;
+}
+function evChip(r,to){const a=APP(r.app);const s=r.shots&&r.shots[0];return `<button class="evc" data-act="go" data-to="${to||'archive-'+r.app}" data-focus="${r.id}">${s?`<img alt="" src="${shotSrc(s,a)}">`:''}<span><b>${h(a.name)}</b> <span class="mono">${h(r.version)}</span><br><span class="muted">${h(SC(r.scene))} · ${md(r.date)}</span></span></button>`}
+
+// ================= 竞品模块（项目内） =================
+function viewModule(p,a){
+  const scs=projScenes(p,a.id); const key=p.id+'|'+a.id;
+  let cur=UI.branch[key]; if(!scs.includes(cur)){cur=(scs.find(s=>['store','pend'].includes(statusOf(p,a.id,s).key)))||scs[0]; UI.branch[key]=cur;}
+  const sv=storeLatest(a);
+  const st=cur?statusOf(p,a.id,cur):null; const recs=cur?activeRecs(p,a.id,cur):[];
+  const flagged=cur&&p.flags[a.id+'|'+cur];
+  const excluded=p.refs.filter(f=>!f.active&&REC(f.rid)&&REC(f.rid).app===a.id);
+  const unrev=recs.filter(r=>!p.reviews[r.id]).length;
+  return `<div class="wrap">
+  <div class="crumb"><a href="#home">首页</a>/<a href="#project-${p.id}">${h(p.group)}-${h(p.name)}</a>/<span>${h(a.name)}</span></div>
+  <div class="phead"><div class="row" style="gap:12px">${markHTML(a,40)}<div><h1>${h(a.name)} <span class="muted small" style="font-weight:400">竞品模块</span></h1><div class="cond"><span>平台 <b>${h(a.platform)}</b></span><span>渠道 <b>${h(a.channel)}</b></span><span>商店最新 <b>${h(sv.v)}</b>（${md(sv.d)}）</span>${a.demo?DEMO:''}</div></div></div>
+  <div class="acts"><button class="btn" data-act="go" data-to="archive-${a.id}">完整档案与时间线</button><button class="btn" data-act="go" data-to="compare-${a.id}" data-scene="${cur||''}">并排对比</button><button class="btn" data-act="store-form" data-app="${a.id}">登记商店更新（模拟）</button></div></div>
+  ${scs.length?`<div class="tabs" role="tablist">${scs.map(s=>{const x=statusOf(p,a.id,s);return `<button role="tab" class="${s===cur?'on':''}" data-act="branch" data-key="${key}" data-scene="${s}">调研分支：${h(SC(s))} <span class="tag ${x.cls}">${x.label}</span></button>`}).join('')}</div>
+  <div class="branchbar"><div class="small"><span class="tag ${st.cls}">${st.label}</span> <span class="muted">${h(st.reason)}</span></div>
+    <div class="acts"><button class="btn" data-act="ai-run" data-pid="${p.id}" data-app="${a.id}" data-scene="${cur}" ${recs.length?'':'disabled'}>AI 整理（模拟）${unrev?` · ${unrev} 条待整理`:''}</button>
+    <button class="btn" data-act="flag" data-pid="${p.id}" data-app="${a.id}" data-scene="${cur}">${flagged?'取消待复查标记':'标记为待复查'}</button>
+    <button class="btn" data-act="ref-picker" data-pid="${p.id}" data-app="${a.id}" data-scene="${cur}">从档案引用</button>
+    <button class="btn pri" data-act="record-form" data-pid="${p.id}" data-app="${a.id}" data-scene="${cur}">新增实测记录</button></div></div>
+  <p class="small muted" style="margin:-4px 0 12px">左：研究员截图与原文（编辑在竞品档案中进行，保留历史版本）；右：模拟 AI 的整理建议，需研究员逐条决定。</p>
+  ${recs.length?recs.map((r,i)=>reviewRow(p,r,recs[i+1])).join(''):`<div class="panel pad stack"><div class="row"><span class="tag st-pend">需补采</span><span>本项目的「${h(SC(cur))}」还没有 ${h(a.name)} 的适用记录。</span></div><div class="row"><button class="btn pri" data-act="record-form" data-pid="${p.id}" data-app="${a.id}" data-scene="${cur}">新增实测记录</button><button class="btn" data-act="ref-picker" data-pid="${p.id}" data-app="${a.id}" data-scene="${cur}">从档案引用已有记录</button></div></div>`}
+  `:'<div class="panel pad muted">该竞品在本项目中没有设置调研板块。到「编辑项目范围」中勾选。</div>'}
+  ${excluded.length?`<section class="sec"><div class="sec-h"><h2>先前引用（当前范围外）</h2><span class="sub">研究问题修改前引用的材料，仍可查看</span></div><div class="panel pad row">${excluded.map(f=>evChip(REC(f.rid))).join('')}</div></section>`:''}
+  </div>`;
+}
+function reviewRow(p,r,prev){
+  const a=APP(r.app), rv=p.reviews[r.id], ed=UI.editing[p.id+'|'+r.id];
+  const hasCause=r.cause&&!/^（?暂无）?$/.test(r.cause.trim());
+  const stale=rv&&rv.stale?['这条记录在整理后被编辑过，建议重新审阅']:[];
+  let ai;
+  if(!rv) ai=`<div class="colh">AI 整理建议 ${SIM}</div><div class="muted small">尚未整理。</div><div style="margin-top:8px"><button class="btn sm" data-act="ai-one" data-pid="${p.id}" data-rid="${r.id}">只整理这一条（模拟）</button></div>`;
+  else if(ed!==undefined) ai=`<div class="colh">编辑后采纳 ${SIM}</div><label class="sr" for="ed-${r.id}" hidden>编辑建议</label><textarea class="ed" id="ed-${r.id}" data-bind="editing.${p.id}|${r.id}">${h(ed)}</textarea><div class="row" style="margin-top:8px"><button class="btn pri sm" data-act="rv-edit-save" data-pid="${p.id}" data-rid="${r.id}">保存并采纳</button><button class="btn sm" data-act="rv-edit-cancel" data-pid="${p.id}" data-rid="${r.id}">取消</button></div><p class="tiny muted" style="margin-top:6px">原始记录不会被修改，编辑结果作为本项目的审核结论保存。</p>`;
+  else if(rv.state==='pending') ai=`<div class="colh">AI 整理建议 ${SIM} ${rv.sug.spec?'<span class="spec">含推测</span>':''}</div><div class="aibox">${h(rv.sug.text)}</div>${missHTML(stale.concat(rv.sug.miss))}<div class="row" style="margin-top:10px"><button class="btn sm" data-act="rv-keep" data-pid="${p.id}" data-rid="${r.id}">保留原文</button><button class="btn sm pri" data-act="rv-adopt" data-pid="${p.id}" data-rid="${r.id}">采纳建议</button><button class="btn sm" data-act="rv-edit" data-pid="${p.id}" data-rid="${r.id}">编辑后采纳</button></div>`;
+  else { const lab={kept:'保留原文',adopted:'采纳建议',edited:'编辑后采纳'}[rv.state];
+    ai=`<div class="colh">审核结论 <span class="tag st-same">已审核 · ${lab}</span> <span class="tiny">${md(rv.at)}${rv.demo?' · 演示':''}</span></div><div class="final">${h(rv.final)}</div>${missHTML(stale.concat(rv.sug.miss))}<details style="margin-top:8px"><summary class="small muted" style="cursor:pointer">查看模拟 AI 原建议</summary><div class="aibox" style="margin-top:6px">${h(rv.sug.text)}</div></details><div class="row" style="margin-top:10px"><button class="btn sm pri" data-act="finding-new" data-pid="${p.id}" data-rid="${r.id}">据此创建发现</button><button class="btn sm ghost" data-act="rv-reset" data-pid="${p.id}" data-rid="${r.id}">重新审阅</button></div>`; }
+  return `<div class="rv" id="rv-${r.id}">
+   <div><div class="colh">截图证据</div>${shotsHTML(r)}<div class="cond" style="margin-top:8px;flex-direction:column;gap:2px"><span>版本 <b>${h(r.version)}</b></span><span>${h(r.platform)} · ${h(r.channel||'未记录渠道')}</span><span>采集 <b>${h(r.date)}</b></span></div><div class="row" style="margin-top:6px">${r.noChange?'<span class="tag st-same">复查无变化</span>':''}${r.demo?DEMO:''}</div></div>
+   <div><div class="colh">研究员原文 <span class="chip" style="line-height:18px">原始记录${r.edited?` · 已编辑 ${md(r.edited)}`:''}</span></div><dl class="notes"><dt>观察到的变化</dt><dd>${r.noChange?'<b>复查后未发现明显变化。</b>':''}${h(r.changes||'—')}</dd><dt>使用感受</dt><dd>${h(r.feeling||'—')}</dd><dt>可能原因 ${hasCause&&r.causeSpec?'<span class="spec">推测</span>':''}</dt><dd>${h(r.cause||'—')}</dd></dl><div class="row small" style="margin-top:8px"><span class="muted">${h(r.author||'')}</span><a href="#archive-${r.app}" data-act="go" data-to="archive-${r.app}" data-focus="${r.id}">在档案中查看</a>${prev?`<a href="#compare-${r.app}" data-act="cmp-pair" data-app="${r.app}" data-a="${prev.id}" data-b="${r.id}">与 ${h(prev.version)} 并排对比</a>`:''}</div></div>
+   <div>${ai}</div></div>`;
+}
+function missHTML(m){return m&&m.length?`<div class="miss">${m.map(x=>`<div>证据提示：${h(x)}</div>`).join('')}</div>`:''}
+
+// ================= 档案 =================
+function viewArchiveIndex(){
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<span>竞品档案</span></div>
+  <div class="phead"><div><h1>竞品档案</h1><p class="q">长期保存每款 App 的历次体验记录。项目只引用这里的记录，修改项目不会改动档案。</p></div><div class="acts"><button class="btn" data-act="store-form">登记商店更新（模拟）</button><button class="btn pri" data-act="record-form">新增记录</button></div></div>
+  <div class="applist">${S.apps.map(a=>{const rs=S.records.filter(r=>r.app===a.id).sort(byDate);const sv=storeLatest(a);const used=S.projects.filter(p=>p.refs.some(f=>REC(f.rid)&&REC(f.rid).app===a.id));const scs=[...new Set(rs.map(r=>r.scene))];
+    return `<article class="ccard" data-act="go" data-to="archive-${a.id}" tabindex="0" role="link"><div class="top">${markHTML(a)}<div style="flex:1;min-width:0"><div class="nm">${h(a.name)}</div><div class="pc">${h(a.platform)} · ${h(a.channel)}</div></div>${a.demo?DEMO:''}</div>
+    <div class="kv"><div><div class="k">商店最新</div><div class="v">${h(sv.v)}</div><div class="d">${md(sv.d)}</div></div><div><div class="k">体验记录</div><div class="v">${rs.length} 条</div><div class="d">${rs[0]?'最近 '+md(rs[0].date):'—'}</div></div></div>
+    <div class="pad row small">${scs.map(s=>`<span class="chip">${h(SC(s))}</span>`).join('')}<span class="muted">被 ${used.length} 个项目引用</span></div></article>`}).join('')}</div></div>`;
+}
+function refBy(rid){return S.projects.map(p=>{const f=p.refs.find(x=>x.rid===rid);return f?{p,f}:null}).filter(Boolean)}
+function viewArchive(a){
+  const fs=UI.archScene[a.id]||'all'; const all=S.records.filter(r=>r.app===a.id).sort(byDate); const rs=fs==='all'?all:all.filter(r=>r.scene===fs);
+  const ab=UI.ab[a.id]||[]; const [A,B]=[REC(ab[0]),REC(ab[1])];
+  const scs=[...new Set(all.map(r=>r.scene))];
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<a href="#archive">竞品档案</a>/<span>${h(a.name)}</span></div>
+  <div class="phead"><div class="row" style="gap:12px">${markHTML(a,40)}<div><h1>${h(a.name)}</h1><div class="cond"><span>平台 <b>${h(a.platform)}</b></span><span>渠道 <b>${h(a.channel)}</b></span><span>${all.length} 条记录</span>${a.demo?DEMO:''}</div></div></div>
+  <div class="acts"><button class="btn" data-act="store-form" data-app="${a.id}">登记商店更新（模拟）</button><button class="btn pri" data-act="record-form" data-app="${a.id}">新增记录</button></div></div>
+  <div class="panel pad small"><b>商店版本</b>（手动登记 / 演示，未接真实商店接口）<div class="row" style="margin-top:6px">${a.store.slice().sort((x,y)=>cmpVer(y.v,x.v)).map(s=>`<span class="chip"><span class="mono">${h(s.v)}</span> · ${md(s.d)} · ${h(s.src)}</span>`).join('')}</div></div>
+  <div class="cmpbar"><div class="row between"><div class="row small"><b>选两次采集并排查看：</b><span class="ablabel">A</span> ${A?`${h(SC(A.scene))} · <span class="mono">${h(A.version)}</span> · ${md(A.date)}`:'<span class="muted">未选</span>'} <span class="ablabel">B</span> ${B?`${h(SC(B.scene))} · <span class="mono">${h(B.version)}</span> · ${md(B.date)}`:'<span class="muted">未选</span>'} ${A&&B&&A.scene!==B.scene?'<span class="spec">场景不同</span>':''}</div><button class="btn pri sm" data-act="go" data-to="compare-${a.id}" ${A&&B?'':'disabled'}>并排对比</button></div>
+  <div class="fgroup" style="margin-top:8px"><span class="lab">业务场景</span>${[['all','全部'],...scs.map(s=>[s,SC(s)])].map(([k,l])=>`<button class="fbtn ${fs===k?'on':''}" data-act="arch-scene" data-app="${a.id}" data-v="${k}">${h(l)}</button>`).join('')}</div></div>
+  <div class="tl">${rs.map(r=>{const by=refBy(r.id);const sel=ab.includes(r.id);const hasCause=r.cause&&!/^（?暂无）?$/.test(r.cause.trim());
+   return `<div class="tli ${sel?'sel':''} ${UI.focus===r.id?'focus':''}" id="tl-${r.id}"><div class="date">${r.date.slice(0,4)}<br>${md(r.date)}</div><div class="dot"></div><div class="body">${shotsHTML(r,3)}<div style="min-width:0">
+   <div class="row between"><div class="cond"><span class="chip">${h(SC(r.scene))}</span><span>版本 <b>${h(r.version)}</b></span><span>${h(r.platform)} · ${h(r.channel||'未记录渠道')}</span><span>采集 <b>${h(r.date)}</b></span>${r.noChange?'<span class="tag st-same">复查无变化</span>':''}${r.demo?DEMO:''}</div>
+   <div class="abpick" aria-label="选为对比"><button class="${ab[0]===r.id?'on':''}" data-act="pick" data-app="${a.id}" data-i="0" data-rid="${r.id}" title="选为 A">A</button><button class="${ab[1]===r.id?'on':''}" data-act="pick" data-app="${a.id}" data-i="1" data-rid="${r.id}" title="选为 B">B</button></div></div>
+   <div class="three"><div><div class="k">观察到的变化</div>${h(r.changes||'—')}</div><div><div class="k">使用感受</div>${h(r.feeling||'—')}</div><div><div class="k">可能原因 ${hasCause&&r.causeSpec?'<span class="spec">推测</span>':''}</div>${h(r.cause||'—')}</div></div>
+   <div class="row between" style="margin-top:8px;align-items:flex-end"><div class="tiny muted" style="min-width:0;flex:1">${by.length?'被引用：'+by.map(({p,f})=>`<a href="#project-${p.id}">${h(p.group+'-'+p.name)}</a>（${h(SC(f.scene))}${f.active?'':'，当前范围外'}）`).join('、'):'尚未被项目引用'} · ${h(r.author||'')}${r.edited?` · 已编辑 ${md(r.edited)}（保留 ${(r.history||[]).length} 个历史版本）`:''}</div>
+   <div class="ops"><button class="btn sm" data-act="rec-edit" data-rid="${r.id}">编辑</button><button class="btn sm danger" data-act="rec-del" data-rid="${r.id}">删除</button></div></div></div></div></div>`}).join('')||'<div class="panel pad muted">该场景暂无记录。</div>'}</div></div>`;
+}
+function viewCompare(a){
+  const all=S.records.filter(r=>r.app===a.id).sort(byDate);
+  let ab=UI.ab[a.id]||[];
+  if(!(REC(ab[0])&&REC(ab[1]))){ // 默认：最近两条同场景
+    const want=UI.cmpScene; const groups={};all.forEach(r=>(groups[r.scene]=groups[r.scene]||[]).push(r));
+    const g=(want&&groups[want]&&groups[want].length>1)?groups[want]:Object.values(groups).filter(x=>x.length>1).sort((x,y)=>y[0].date>x[0].date?1:-1)[0];
+    ab=g?[g[1].id,g[0].id]:[all[1]&&all[1].id,all[0]&&all[0].id]; UI.ab[a.id]=ab;
+  }
+  const A=REC(ab[0]),B=REC(ab[1]);
+  const opt=sel=>all.map(r=>`<option value="${r.id}" ${sel===r.id?'selected':''}>${h(SC(r.scene))} · ${h(r.version)} · ${h(r.date)}${r.noChange?' · 无变化':''}</option>`).join('');
+  const col=(L,r,o)=>{if(!r)return `<div class="cmpcol pad muted">未选择</div>`;const d=k=>o&&o[k]!==r[k]?'diff':'';
+    return `<div class="cmpcol"><div class="row between" style="padding:10px 14px"><div class="row"><span class="ablabel">${L}</span><b>${h(SC(r.scene))}</b>${r.noChange?'<span class="tag st-same">复查无变化</span>':''}${r.demo?DEMO:''}</div><a class="small" href="#archive-${a.id}" data-act="go" data-to="archive-${a.id}" data-focus="${r.id}">在时间线中查看</a></div>
+    <div class="cmpcond"><div class="${d('version')}"><div class="k">版本</div><div class="v">${h(r.version)}</div></div><div class="${d('platform')}"><div class="k">平台</div><div class="v">${h(r.platform)}</div></div><div class="${d('channel')}"><div class="k">渠道</div><div class="v">${h(r.channel||'—')}</div></div><div class="${d('date')}"><div class="k">采集日期</div><div class="v">${h(r.date)}</div></div></div>
+    <div class="cmpshots">${(r.shots||[]).map((s,i)=>`<button class="shot" data-act="img" data-rid="${r.id}" data-i="${i}"><img alt="${h(r.version)} 截图" src="${shotSrc(s,a)}"></button>`).join('')||'<span class="muted small">无截图</span>'}</div>
+    <div class="cmpnotes"><dl class="notes"><dt>观察到的变化</dt><dd>${h(r.changes||'—')}</dd><dt>使用感受</dt><dd>${h(r.feeling||'—')}</dd><dt>可能原因 ${r.causeSpec&&r.cause&&!/暂无/.test(r.cause)?'<span class="spec">推测</span>':''}</dt><dd>${h(r.cause||'—')}</dd></dl><p class="tiny muted" style="margin-top:8px">${h(r.author||'')}</p></div></div>`};
+  const warn=[];if(A&&B){if(A.scene!==B.scene)warn.push('两次采集的业务场景不同，对比结论需谨慎');if(A.platform!==B.platform)warn.push('平台不同（'+A.platform+' / '+B.platform+'），差异可能来自平台而非版本');}
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<a href="#archive">竞品档案</a>/<a href="#archive-${a.id}">${h(a.name)}</a>/<span>版本对比</span></div>
+  <div class="phead"><div class="row" style="gap:12px">${markHTML(a,36)}<h1>${h(a.name)} · 两次采集并排对比</h1></div><div class="acts"><button class="btn" data-act="cmp-swap" data-app="${a.id}">交换 A / B</button><button class="btn" data-act="go" data-to="archive-${a.id}">返回时间线</button></div></div>
+  <div class="panel pad grid2" style="margin-bottom:12px"><div class="field"><label for="cmpA">A（较早）</label><select id="cmpA" data-on="cmp-sel" data-app="${a.id}" data-i="0">${opt(ab[0])}</select></div><div class="field"><label for="cmpB">B（较新）</label><select id="cmpB" data-on="cmp-sel" data-app="${a.id}" data-i="1">${opt(ab[1])}</select></div></div>
+  ${A&&B?`<div class="note ${warn.length?'warn':''}" style="margin-bottom:12px">${A.scene===B.scene?`同一业务场景「${h(SC(A.scene))}」`:'跨场景'} · 版本 <span class="mono">${h(A.version)} → ${h(B.version)}</span> · 间隔 ${Math.abs(daysBetween(A.date,B.date))} 天${warn.length?' · '+warn.map(h).join('；'):''}</div>`:''}
+  <div class="cmp">${col('A',A,B)}${col('B',B,A)}</div></div>`;
+}
+
+// ================= 项目范围编辑 =================
+function scopeDraft(p){return UI.scope[p.id]||(UI.scope[p.id]={group:p.group,name:p.name,role:p.role,question:p.question,scenes:p.scenes.slice(),dims:p.dims.join('，'),apps:JSON.parse(JSON.stringify(p.apps)),newScene:''})}
+function viewScope(p){
+  const D=scopeDraft(p); const notIn=S.apps.filter(a=>!D.apps.some(e=>e.id===a.id)); const others=S.projects.filter(x=>x.id!==p.id);
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<a href="#project-${p.id}">${h(p.group)}-${h(p.name)}</a>/<span>项目范围</span></div>
+  <div class="phead"><div><h1>编辑项目范围</h1><p class="q">修改研究问题或业务场景后，会进入「重新选择适用记录」。档案里的原始记录不会被改动。</p></div><div class="acts"><button class="btn" data-act="scope-cancel" data-pid="${p.id}">放弃修改</button><button class="btn pri" data-act="scope-save" data-pid="${p.id}">保存范围</button></div></div>
+  <div class="panel pad stack" style="gap:14px">
+    <div class="grid3"><div class="field"><label for="sc-group">产品类型</label><input type="text" id="sc-group" data-bind="scope.${p.id}.group" value="${h(D.group)}"></div><div class="field"><label for="sc-name">项目名称</label><input type="text" id="sc-name" data-bind="scope.${p.id}.name" value="${h(D.name)}"></div><div class="field"><label for="sc-role">客户角色</label><input type="text" id="sc-role" data-bind="scope.${p.id}.role" value="${h(D.role)}"></div></div>
+    <div class="field"><label for="sc-q">研究问题</label><textarea class="in" id="sc-q" data-bind="scope.${p.id}.question">${h(D.question)}</textarea></div>
+    <div class="field"><span class="flabel">业务场景</span><div class="row">${S.scenes.map(s=>`<label class="tgl ${D.scenes.includes(s.id)?'on':''}"><input type="checkbox" data-act="scope-scene" data-pid="${p.id}" data-scene="${s.id}" ${D.scenes.includes(s.id)?'checked':''}>${h(s.name)}</label>`).join('')}<input type="text" id="sc-new" style="width:150px" placeholder="新场景名称" data-bind="scope.${p.id}.newScene" value="${h(D.newScene)}"><button class="btn sm" data-act="scope-add-scene" data-pid="${p.id}">添加场景</button></div></div>
+    <div class="field"><label for="sc-dims">观察维度</label><input type="text" id="sc-dims" data-bind="scope.${p.id}.dims" value="${h(D.dims)}"><span class="hint">用逗号分隔</span></div>
+  </div>
+  <section class="sec"><div class="sec-h"><h2>竞品模块与调研板块</h2><span class="sub">同一个竞品可以在本项目只调查部分板块</span></div>
+  <div class="panel"><div class="scroll-x"><table class="mx"><thead><tr><th>竞品</th>${D.scenes.map(s=>`<th>${h(SC(s))}</th>`).join('')}<th></th></tr></thead><tbody>
+  ${D.apps.map(e=>{const a=APP(e.id);return `<tr><td><div class="row">${markHTML(a,22)}${h(a.name)}</div></td>${D.scenes.map(s=>`<td><label class="check"><input type="checkbox" data-act="scope-cell" data-pid="${p.id}" data-app="${e.id}" data-scene="${s}" ${e.scenes.includes(s)?'checked':''}>调查</label></td>`).join('')}<td><button class="btn sm ghost" data-act="scope-rm-app" data-pid="${p.id}" data-app="${e.id}">移出项目</button></td></tr>`}).join('')}
+  </tbody></table></div>
+  <div class="pad row" style="border-top:1px solid var(--line)"><label class="small" for="sc-add">从竞品档案添加</label><select id="sc-add" style="width:auto" data-on="scope-add-app" data-pid="${p.id}"><option value="">选择 App…</option>${notIn.map(a=>`<option value="${a.id}">${h(a.name)}</option>`).join('')}</select>
+  <label class="small" for="sc-imp" style="margin-left:12px">从过往项目导入竞品模块</label><select id="sc-imp" style="width:auto" data-on="scope-import" data-pid="${p.id}"><option value="">选择项目…</option>${others.map(x=>`<option value="${x.id}">${h(x.group+'-'+x.name)}（${x.apps.length} 款）</option>`).join('')}</select></div></div></section>
+  <section class="sec"><div class="sec-h"><h2>示例：从「首页」切换到「卡包页」，复用历史记录</h2></div>
+  <div class="panel pad stack small"><p>「首页」项目已经积累了各家的<b>资产入口</b>记录。卡包页调研要回答“用户从资产入口到卡包要走几步”，所以资产入口这部分可以直接复用；<b>卡包页结构</b>是新场景，没有记录的 App 会被标为需补采。</p>
+  <div class="row"><span class="chip">复用：资产入口 · ${S.records.filter(r=>r.scene==='asset').length} 条记录</span><span class="chip">新增：卡包页结构 · 档案中已有 ${S.records.filter(r=>r.scene==='card').length} 条</span><span class="chip">原始档案不改动</span></div>
+  <div class="row"><button class="btn pri" data-act="quick-example">用此示例新建卡包页项目</button><a href="#project-pb">查看已按此方式建好的「卡包页」项目 →</a></div></div></section>
+  </div>`;
+}
+
+// ================= 重新选择适用记录 =================
+function rescopeDraft(p){
+  if(UI.rescope[p.id]) return UI.rescope[p.id];
+  const map={},add={},gaps={};
+  p.refs.forEach(f=>{map[f.rid]=(f.active&&p.scenes.includes(f.scene))?f.scene:''});
+  return UI.rescope[p.id]={map,add,gaps};
+}
+function coverage(p,D){const cov={};const put=(rid,s)=>{if(!s)return;const r=REC(rid);if(!r)return;const k=r.app+'|'+s;cov[k]=(cov[k]||0)+1};Object.entries(D.map).forEach(([rid,s])=>put(rid,s));Object.entries(D.add).forEach(([rid,s])=>put(rid,s));return cov}
+function viewRescope(p){
+  const D=rescopeDraft(p); const last=p.history[p.history.length-1]; const cov=coverage(p,D);
+  const appIds=p.apps.map(e=>e.id); const refIds=p.refs.map(f=>f.rid);
+  const others=S.records.filter(r=>appIds.includes(r.app)&&!refIds.includes(r.id)).sort(byDate);
+  const sel=(rid,val,bind)=>`<select data-on="rs-map" data-pid="${p.id}" data-rid="${rid}" data-kind="${bind}" aria-label="在新范围中用于"><option value="">${bind==='map'?'不适用（保留在先前引用）':'不引用'}</option>${p.scenes.map(s=>`<option value="${s}" ${val===s?'selected':''}>用于：${h(SC(s))}</option>`).join('')}</select>`;
+  const row=(r,val,bind,f)=>{const a=APP(r.app);return `<tr><td style="width:56px">${r.shots&&r.shots[0]?`<button class="shot" style="width:40px" data-act="img" data-rid="${r.id}" data-i="0"><img alt="" src="${shotSrc(r.shots[0],a)}"></button>`:''}</td><td><b>${h(a.name)}</b><div class="tiny muted">${h(SC(r.scene))} · <span class="mono">${h(r.version)}</span> · ${md(r.date)}</div></td><td class="small" style="max-width:360px">${h((r.changes||'').slice(0,64))}${(r.changes||'').length>64?'…':''}${f?`<div class="tiny muted">原引用于：${h(SC(f.scene))}${f.active?'':'（已在范围外）'}</div>`:''}</td><td>${sel(r.id,val,bind)}</td><td><a class="small" href="#archive-${r.app}" data-act="go" data-to="archive-${r.app}" data-focus="${r.id}">档案</a></td></tr>`};
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<a href="#project-${p.id}">${h(p.group)}-${h(p.name)}</a>/<span>重新选择适用记录</span></div>
+  <div class="phead"><div><h1>重新选择适用记录</h1><p class="q">当前研究问题：${h(p.question)}</p></div><div class="acts"><button class="btn" data-act="go" data-to="project-${p.id}">返回看板</button><button class="btn pri" data-act="rescope-save" data-pid="${p.id}">应用引用调整</button></div></div>
+  ${last?`<div class="panel pad small stack" style="margin-bottom:12px"><b>研究问题修改记录</b><div class="hist">${p.history.slice().reverse().map(x=>`<div><span class="mono">${h(x.at)}</span> 原问题：「${h(x.question)}」 · 原场景：${x.scenes.map(SC).map(h).join('、')}</div>`).join('')}</div></div>`:''}
+  <div class="note" style="margin-bottom:14px">这里只调整本项目的引用。档案中的截图与笔记保持原样，其他项目对同一记录的引用不受影响。</div>
+  <section class="sec"><div class="sec-h"><h2>先前引用的材料 <span class="muted small">${p.refs.length} 条</span></h2><span class="sub">选择它在新范围里对应的场景，或设为不适用</span></div>
+  <div class="panel scroll-x"><table class="mx"><thead><tr><th>截图</th><th>App / 原记录</th><th>笔记摘要</th><th>在新范围中</th><th></th></tr></thead><tbody>${p.refs.filter(f=>REC(f.rid)).map(f=>row(REC(f.rid),D.map[f.rid],'map',f)).join('')}</tbody></table></div></section>
+  <section class="sec"><div class="sec-h"><h2>档案中可引用的其他记录 <span class="muted small">${others.length} 条</span></h2><span class="sub">来自本项目竞品的历史记录，也包括其他项目登记的</span></div>
+  <div class="panel scroll-x">${others.length?`<table class="mx"><thead><tr><th>截图</th><th>App / 原记录</th><th>笔记摘要</th><th>引用为</th><th></th></tr></thead><tbody>${others.map(r=>row(r,D.add[r.id]||'','add')).join('')}</tbody></table>`:'<div class="pad muted small">没有其他可引用的记录。</div>'}</div></section>
+  <section class="sec"><div class="sec-h"><h2>场景覆盖与补采</h2><span class="sub">没有适用记录的场景，建议标记为需补采</span></div>
+  <div class="panel scroll-x"><table class="mx"><thead><tr><th>竞品</th>${p.scenes.map(s=>`<th>${h(SC(s))}</th>`).join('')}</tr></thead><tbody>${p.apps.map(e=>`<tr><td>${h(APP(e.id).name)}</td>${p.scenes.map(s=>{const k=e.id+'|'+s;if(!e.scenes.includes(s))return '<td class="muted small">未调查</td>';const n=cov[k]||0;const g=D.gaps[k]!==undefined?D.gaps[k]:true;return `<td>${n?`<span class="tag st-same">已覆盖 ${n} 条</span>`:`<label class="tgl ${g?'on':''}"><input type="checkbox" data-act="rs-gap" data-pid="${p.id}" data-k="${k}" ${g?'checked':''}>标记需补采</label>`}</td>`}).join('')}</tr>`).join('')}</tbody></table></div></section>
+  </div>`;
+}
+
+// ================= 汇总与发现 =================
+function viewFindings(p){
+  const conf=p.findings.filter(f=>f.status==='confirmed'), cand=p.findings.filter(f=>f.status==='candidate');
+  const reviewed=Object.entries(p.reviews).filter(([,v])=>v.state!=='pending').length;
+  const item=f=>`<div class="fd ${UI.newFinding===f.id?'focus':''}"><div style="min-width:0"><div class="row"><button class="linkish" data-act="go" data-to="finding-${p.id}-${f.id}"><b>${h(f.title)}</b></button><span class="chip">${f.type==='trend'?'跨产品趋势':'单品发现'}</span>${f.status==='candidate'?'<span class="tag st-store">候选</span>':'<span class="tag st-same">已确认</span>'}${f.demo?DEMO:''}</div><p class="small" style="margin-top:4px;color:var(--ink-2)">${h(f.body)}</p><div class="ev">${f.rids.map(REC).filter(Boolean).map(r=>evChip(r,'finding-'+p.id+'-'+f.id)).join('')}</div></div><div class="stack" style="align-items:flex-end"><span class="tiny muted mono">${md(f.confirmed||f.created)}</span>${f.status==='candidate'?`<button class="btn sm pri" data-act="finding-confirm" data-pid="${p.id}" data-fid="${f.id}">确认并加入汇总</button>`:''}<button class="btn sm" data-act="go" data-to="finding-${p.id}-${f.id}">查看证据</button></div></div>`;
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<a href="#project-${p.id}">${h(p.group)}-${h(p.name)}</a>/<span>项目汇总</span></div>
+  <div class="phead"><div><h1>项目汇总</h1><p class="q">${h(p.question)}</p><p class="small muted" style="margin-top:4px">已审核记录 ${reviewed} 条 · 发现只能从已审核记录创建，每条都能回到截图与原始笔记。</p></div><div class="acts"><button class="btn" data-act="go" data-to="project-${p.id}">返回看板</button><button class="btn pri" data-act="finding-new" data-pid="${p.id}">从已审核记录创建发现</button></div></div>
+  <section class="sec"><div class="sec-h"><h2>已确认的发现 <span class="muted small">${conf.length}</span></h2></div><div class="panel">${conf.map(item).join('')||'<div class="pad muted small">暂无。</div>'}</div></section>
+  <section class="sec"><div class="sec-h"><h2>候选（待确认） <span class="muted small">${cand.length}</span></h2><span class="sub">跨产品趋势默认先作为候选</span></div><div class="panel">${cand.map(item).join('')||'<div class="pad muted small">暂无。</div>'}</div></section></div>`;
+}
+function viewFinding(p,f){
+  const recs=f.rids.map(REC).filter(Boolean);
+  return `<div class="wrap"><div class="crumb"><a href="#home">首页</a>/<a href="#project-${p.id}">${h(p.group)}-${h(p.name)}</a>/<a href="#findings-${p.id}">项目汇总</a>/<span>发现</span></div>
+  <div class="phead"><div style="min-width:0"><div class="row"><span class="chip">${f.type==='trend'?'跨产品趋势':'单品发现'}</span>${f.status==='candidate'?'<span class="tag st-store">候选</span>':'<span class="tag st-same">已确认 · '+md(f.confirmed)+'</span>'}${f.demo?DEMO:''}</div><h1 style="margin-top:6px">${h(f.title)}</h1><p class="q">${h(f.body)}</p></div><div class="acts">${f.status==='candidate'?`<button class="btn pri" data-act="finding-confirm" data-pid="${p.id}" data-fid="${f.id}">确认并加入汇总</button>`:''}<button class="btn" data-act="go" data-to="findings-${p.id}">返回汇总</button></div></div>
+  <section class="sec"><div class="sec-h"><h2>支撑证据 <span class="muted small">${recs.length} 条版本记录</span></h2><span class="sub">左侧截图可放大；可直接打开档案中的原始记录</span></div>
+  <div class="panel">${recs.map(r=>{const a=APP(r.app);const rv=p.reviews[r.id];const prev=S.records.filter(x=>x.app===r.app&&x.scene===r.scene&&x.date<r.date).sort(byDate)[0];
+   return `<div class="ev-full">${shotsHTML(r)}<div style="min-width:0"><div class="row between"><div class="row">${markHTML(a,22)}<b>${h(a.name)}</b><span class="chip">${h(SC(r.scene))}</span></div><div class="row"><button class="btn sm pri" data-act="go" data-to="archive-${r.app}" data-focus="${r.id}">打开版本记录</button>${prev?`<button class="btn sm" data-act="cmp-pair" data-app="${r.app}" data-a="${prev.id}" data-b="${r.id}">与 ${h(prev.version)} 并排对比</button>`:''}<button class="btn sm ghost" data-act="go" data-to="module-${p.id}-${r.app}" data-branch="${r.scene}">回到竞品模块</button></div></div>
+   <div class="cond" style="margin:6px 0 8px"><span>版本 <b>${h(r.version)}</b></span><span>${h(r.platform)} · ${h(r.channel)}</span><span>采集 <b>${h(r.date)}</b></span>${r.noChange?'<span class="tag st-same">复查无变化</span>':''}</div>
+   ${rv&&rv.state!=='pending'?`<div class="final">${h(rv.final)}</div>`:'<div class="note warn">该记录尚未审核。</div>'}
+   <details style="margin-top:8px"><summary class="small muted" style="cursor:pointer">原始记录（研究员原文）</summary><dl class="notes" style="margin-top:6px"><dt>观察到的变化</dt><dd>${h(r.changes)}</dd><dt>使用感受</dt><dd>${h(r.feeling)}</dd><dt>可能原因 ${r.causeSpec&&r.cause&&!/暂无/.test(r.cause)?'<span class="spec">推测</span>':''}</dt><dd>${h(r.cause||'—')}</dd></dl></details></div></div>`}).join('')}</div></section></div>`;
+}
+
+// ================= 弹窗 =================
+function modalHTML(){
+  const M=UI.modal; if(!M) return '';
+  const wrap=(title,body,foot,wide)=>`<div class="scrim" data-act="scrim"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true" aria-label="${h(title)}"><div class="mh"><h2>${title}</h2><button class="x" data-act="close" aria-label="关闭">×</button></div><div class="mb">${body}</div>${foot?`<div class="mf">${foot}</div>`:''}</div></div>`;
+  if(M.type==='img'){const r=REC(M.rid);const a=APP(r.app);return wrap(`${h(a.name)} ${h(r.version)} · ${h(SC(r.scene))}`,`<div class="lightbox"><img alt="截图" src="${shotSrc(r.shots[M.i],a)}"></div><div class="cond" style="justify-content:center"><span>${h(r.platform)} · ${h(r.channel)}</span><span>采集 <b>${h(r.date)}</b></span><span>第 ${M.i+1} / ${r.shots.length} 张</span></div>`,r.shots.length>1?`<button class="btn" data-act="img-step" data-d="-1">上一张</button><button class="btn" data-act="img-step" data-d="1">下一张</button>`:'')}
+  if(M.type==='record'){const D=M.d;const p=M.pid&&PROJ(M.pid);const a=APP(D.app);const sv=a&&storeLatest(a);const ER=M.editId&&REC(M.editId);
+    return wrap(ER?'编辑记录':'新增实测记录',`${ER?`<div class="note">保存后更新档案中的这条记录，引用它的 ${refBy(ER.id).length} 个项目会看到新内容；修改前的文字与采集信息作为历史版本保留。</div>`:''}${p?`<div class="note">保存后写入「${h(a.name)}」的竞品档案，并引用到项目「${h(p.group)}-${h(p.name)}」的「${h(SC(D.scene))}」分支。</div>`:''}
+    <div class="grid3"><div class="field"><label for="rf-app">App</label><select id="rf-app" data-bind="modal.d.app" data-rerender="1">${S.apps.map(x=>`<option value="${x.id}" ${x.id===D.app?'selected':''}>${h(x.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="rf-scene">业务场景</label><select id="rf-scene" data-bind="modal.d.scene">${S.scenes.map(s=>`<option value="${s.id}" ${s.id===D.scene?'selected':''}>${h(s.name)}</option>`).join('')}</select></div>
+    <div class="field"><label for="rf-v">实测版本号</label><input type="text" id="rf-v" class="mono" data-bind="modal.d.version" value="${h(D.version)}"><span class="hint">商店最新：${sv?h(sv.v):'—'}</span></div></div>
+    <div class="grid4"><div class="field"><label for="rf-pf">平台</label><select id="rf-pf" data-bind="modal.d.platform">${['iOS','Android','HarmonyOS','iPadOS','Web / H5'].map(x=>`<option ${x===D.platform?'selected':''}>${x}</option>`).join('')}</select></div>
+    <div class="field"><label for="rf-ch">渠道</label><input type="text" id="rf-ch" list="chs" data-bind="modal.d.channel" value="${h(D.channel)}"><datalist id="chs"><option>App Store</option><option>华为应用市场</option><option>鸿蒙应用市场</option><option>应用宝</option><option>小米应用商店</option><option>官网下载</option><option>TestFlight / 内测</option></datalist></div>
+    <div class="field"><label for="rf-d">采集日期</label><input type="date" id="rf-d" data-bind="modal.d.date" value="${h(D.date)}"></div>
+    <div class="field"><label for="rf-au">采集人</label><input type="text" id="rf-au" data-bind="modal.d.author" value="${h(D.author)}"></div></div>
+    <div class="field"><span class="flabel">截图</span><label class="drop" id="drop" for="rf-file">点击选择或拖入截图（可多张，自动压缩后保存在本浏览器）</label><input type="file" id="rf-file" accept="image/*" multiple hidden data-on="files">
+    ${D.shots.length?`<div class="thumbs">${D.shots.map((s,i)=>`<div class="t"><img alt="截图 ${i+1}" src="${shotSrc(s,a)}"><button data-act="rf-rm" data-i="${i}" aria-label="移除">×</button></div>`).join('')}</div>`:''}</div>
+    <label class="check"><input type="checkbox" data-bind="modal.d.noChange" data-rerender="1" ${D.noChange?'checked':''}>复查后未发现明显变化</label>
+    <div class="field"><label for="rf-c">观察到的变化</label><textarea class="in" id="rf-c" data-bind="modal.d.changes" placeholder="${D.noChange?'可写明复查了哪些位置，例如：模块顺序、宫格数量、入口文案均与上一版一致':'客观描述看到了什么：位置、数量、文案、路径的变化'}">${h(D.changes)}</textarea></div>
+    <div class="grid2"><div class="field"><label for="rf-f">使用感受</label><textarea class="in" id="rf-f" data-bind="modal.d.feeling" placeholder="亲自体验后的主观感受">${h(D.feeling)}</textarea></div>
+    <div class="field"><label for="rf-r">可能原因</label><textarea class="in" id="rf-r" data-bind="modal.d.cause" placeholder="对变化原因的判断">${h(D.cause)}</textarea><label class="check small"><input type="checkbox" data-bind="modal.d.causeSpec" ${D.causeSpec?'checked':''}>标记为推测（未经版本说明或公开信息证实）</label></div></div>
+    ${M.err?`<div class="note warn">${h(M.err)}</div>`:''}`,
+    `<span class="tiny muted">${ER?'项目中的审阅结论单独保存，不会被改写。':'编辑记录时会保留历史版本；项目中的审阅结论单独保存。'}</span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn pri" data-act="rf-save">${ER?'保存修改':`保存记录${p?'并更新状态':''}`}</button></div>`,true)}
+  if(M.type==='store'){const D=M.d;return wrap('登记商店更新（模拟）',`<div class="note">第一版不接真实商店接口。在这里手动登记你在商店看到的新版本，或用“填入模拟版本”生成一条演示更新。</div>
+    <div class="grid3"><div class="field"><label for="sf-app">App</label><select id="sf-app" data-bind="modal.d.app" data-rerender="1" data-on="store-app">${S.apps.map(x=>`<option value="${x.id}" ${x.id===D.app?'selected':''}>${h(x.name)}</option>`).join('')}</select></div><div class="field"><label for="sf-v">商店版本号</label><input type="text" id="sf-v" class="mono" data-bind="modal.d.v" value="${h(D.v)}"><span class="hint">当前最新：${h(storeLatest(APP(D.app)).v)}</span></div><div class="field"><label for="sf-d">上架日期</label><input type="date" id="sf-d" data-bind="modal.d.d" value="${h(D.d)}"></div></div>
+    <div class="field"><label for="sf-n">版本说明摘要</label><input type="text" id="sf-n" data-bind="modal.d.note" value="${h(D.note)}" placeholder="例如：首页焕新、修复已知问题"></div>
+    <label class="check"><input type="checkbox" data-bind="modal.d.sim" ${D.sim?'checked':''}>这是模拟更新（标为演示数据）</label>${M.err?`<div class="note warn">${h(M.err)}</div>`:''}`,
+    `<button class="btn" data-act="sf-sim">填入模拟版本</button><div class="row"><button class="btn" data-act="close">取消</button><button class="btn pri" data-act="sf-save">登记</button></div>`)}
+  if(M.type==='refpick'){const p=PROJ(M.pid);const a=APP(M.app);const list=S.records.filter(r=>r.app===a.id&&!p.refs.some(f=>f.rid===r.id&&f.active&&f.scene===M.scene)).sort(byDate);
+    return wrap(`从档案引用 · ${h(a.name)} → ${h(SC(M.scene))}`,`<p class="small muted">引用不会复制或修改原始记录。同一条记录可以被多个项目引用。</p>${list.length?list.map(r=>`<div class="row" style="border-top:1px solid var(--line);padding-top:10px;align-items:flex-start;flex-wrap:nowrap">${shotsHTML(r,1)}<div style="flex:1;min-width:0"><div class="cond"><span class="chip">${h(SC(r.scene))}</span><span>版本 <b>${h(r.version)}</b></span><span>${md(r.date)}</span>${r.scene!==M.scene?'<span class="spec">跨场景引用</span>':''}</div><p class="small" style="margin-top:4px">${h(r.changes)}</p></div><button class="btn sm pri" data-act="ref-add" data-rid="${r.id}">引用</button></div>`).join(''):'<div class="muted">档案中没有可引用的其他记录。</div>'}`,'')}
+  if(M.type==='finding'){const p=PROJ(M.pid);const D=M.d;
+    const rv=p.refs.filter(f=>f.active).map(f=>REC(f.rid)).filter(Boolean).filter((r,i,arr)=>arr.indexOf(r)===i).sort((x,y)=>x.scene.localeCompare(y.scene)||x.app.localeCompare(y.app));
+    const apps=[...new Set(D.rids.map(id=>REC(id).app))];
+    return wrap('从已审核记录创建发现',`<div class="row"><label class="tgl ${D.type==='single'?'on':''}"><input type="radio" name="ft" data-act="fd-type" data-v="single" ${D.type==='single'?'checked':''}>单品发现</label><label class="tgl ${D.type==='trend'?'on':''}"><input type="radio" name="ft" data-act="fd-type" data-v="trend" ${D.type==='trend'?'checked':''}>跨产品趋势候选</label><span class="small muted">${D.type==='trend'?'至少选 2 款 App 的已审核记录':'针对一款 App 的结论'}</span></div>
+    <div class="field"><label for="fd-t">发现标题</label><input type="text" id="fd-t" data-bind="modal.d.title" value="${h(D.title)}"></div>
+    <div class="field"><label for="fd-b">说明</label><textarea class="in" id="fd-b" data-bind="modal.d.body">${h(D.body)}</textarea></div>
+    <div class="field"><span class="flabel">支撑证据（只能选已审核记录） · 已选 ${D.rids.length} 条 / ${apps.length} 款 App</span><div class="panel" style="max-height:280px;overflow:auto">${rv.map(r=>{const ok=p.reviews[r.id]&&p.reviews[r.id].state!=='pending';return `<label class="row" style="padding:7px 10px;border-top:1px solid var(--line);flex-wrap:nowrap;${ok?'cursor:pointer':'opacity:.5'}"><input type="checkbox" data-act="fd-rid" data-rid="${r.id}" ${D.rids.includes(r.id)?'checked':''} ${ok?'':'disabled'}><span style="flex:1"><b>${h(APP(r.app).name)}</b> · ${h(SC(r.scene))} · <span class="mono">${h(r.version)}</span> · ${md(r.date)}</span>${ok?'<span class="tag st-same">已审核</span>':'<span class="tiny muted">未审核</span>'}</label>`}).join('')}</div></div>
+    <label class="check"><input type="checkbox" data-bind="modal.d.confirm" ${D.confirm?'checked':''}>确认并加入项目汇总${D.type==='trend'?'（不勾选则作为候选）':''}</label>${M.err?`<div class="note warn">${h(M.err)}</div>`:''}`,
+    `<span></span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn pri" data-act="fd-save">创建发现</button></div>`,true)}
+  if(M.type==='wiz'){const W=UI.wiz;const src=W.source?PROJ(W.source):null;const tags=S.sceneTags;const chosen=parseScenes(W.sceneText);
+    const nOn=src?src.apps.filter(e=>APP(e.id)&&W.apps[e.id]!==false).length:0, nAll=src?src.apps.filter(e=>APP(e.id)).length:0;
+    return wrap('新建调研项目',`<div class="grid3"><div class="field"><label for="wz-g">产品类型</label><input type="text" id="wz-g" list="groups" data-bind="wiz.group" value="${h(W.group)}"><datalist id="groups">${[...new Set(S.projects.map(p=>p.group))].map(g=>`<option>${h(g)}</option>`).join('')}</datalist></div><div class="field"><label for="wz-n">项目名称（侧栏二级菜单）</label><input type="text" id="wz-n" data-bind="wiz.name" value="${h(W.name)}" placeholder="例如：卡包页"></div><div class="field"><label for="wz-r">客户角色</label><input type="text" id="wz-r" data-bind="wiz.role" value="${h(W.role)}"></div></div>
+    <div class="field"><label for="wz-q">研究问题</label><textarea class="in" id="wz-q" data-bind="wiz.question">${h(W.question)}</textarea></div>
+    <div class="field"><label for="wz-s">业务场景</label><input type="text" id="wz-s" data-bind="wiz.sceneText" value="${h(W.sceneText)}" placeholder="点下方标签的 ＋ 填入，也可以直接输入；多个场景用顿号分隔" autocomplete="off">
+      <div class="taglist">${tags.map((t,i)=>`<span class="stag ${chosen.includes(t)?'on':''}"><button type="button" class="stag-add" data-act="wz-tag-add" data-i="${i}" aria-label="把「${h(t)}」填入业务场景">＋</button><span class="stag-t">${h(t)}</span><button type="button" class="stag-del" data-act="wz-tag-del" data-i="${i}" aria-label="删除场景标签「${h(t)}」">×</button></span>`).join('')}${tags.length<6?(W.addingTag?`<span class="stag-new"><input type="text" id="wz-newtag" data-bind="wiz.newTag" value="${h(W.newTag||'')}" placeholder="新场景名称" aria-label="新场景名称"><button type="button" class="btn sm pri" data-act="wz-tag-save">添加</button><button type="button" class="btn sm" data-act="wz-tag-cancel">取消</button></span>`:`<button type="button" class="stag-plus" data-act="wz-tag-new">＋ 添加新场景标签</button>`):''}</div>
+      <span class="hint">可选用的场景标签 ${tags.length} / 6。删除标签不会删除档案里的记录。</span></div>
+    <div class="field"><label for="wz-d">观察维度</label><input type="text" id="wz-d" data-bind="wiz.dims" value="${h(W.dims)}" placeholder="用逗号分隔"></div>
+    <hr class="sep"><div class="field"><label class="sectitle" for="wz-src-in">竞品模块</label>
+      <div class="combo"><input type="text" id="wz-src-in" role="combobox" aria-expanded="false" aria-controls="wz-src-list" aria-autocomplete="list" autocomplete="off" value="${h(srcLabel(W.source))}" placeholder="输入项目名称筛选"><span class="combo-caret" aria-hidden="true">▾</span><ul class="combo-list" id="wz-src-list" role="listbox" hidden></ul></div>
+      <span class="hint">选择是否复用某个过往项目的竞品。每新建一个项目，这里会多一个选项。</span></div>
+    ${src?`<div class="srcbox"><div class="row between small"><span>「${h(src.group+'-'+src.name)}」的竞品 · 已选 ${nOn} / ${nAll}</span><button type="button" class="btn sm ghost" data-act="wz-all">${nOn===nAll?'全部取消':'全部勾选'}</button></div>
+      <div class="srclist" role="group" aria-label="本次复用的竞品">${src.apps.filter(e=>APP(e.id)).map(e=>{const a=APP(e.id);const on=W.apps[a.id]!==false;return `<label class="srcitem"><input type="checkbox" data-act="wz-app" data-app="${a.id}" ${on?'checked':''}>${markHTML(a,22)}<span class="si-n">${h(a.name)}</span><span class="si-m">${h(a.platform)} · ${h(a.channel)} · 原项目调查：${e.scenes.map(SC).map(h).join('、')}</span></label>`}).join('')}</div>
+      <label class="check small"><input type="checkbox" data-bind="wiz.reuse" data-rerender="1" ${W.reuse?'checked':''}>自动引用档案中同场景的最新记录（不复制、不修改原始记录）</label></div>`:''}
+    ${UI.modal.err?`<div class="note warn">${h(UI.modal.err)}</div>`:''}`,
+    `<span class="small muted" id="wz-sum">${h(wizSummary())}</span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn pri" data-act="wz-create">创建项目</button></div>`,true)}
+  if(M.type==='carddel'){const p=PROJ(M.pid);const ids=UI.manage[p.id]||[];return wrap('删除竞品卡片',`<p>从项目「${h(p.group+'-'+p.name)}」移除以下 ${ids.length} 个竞品卡片：</p><div class="row">${ids.map(id=>`<span class="chip">${h(APP(id).name)}</span>`).join('')}</div><div class="note">只影响本项目：本项目对这些 App 记录的引用、待复查标记会一并移除。竞品档案中的 App 和全部体验记录保留，其他项目不受影响。</div>`,`<span></span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn danger-fill" data-act="card-del-do">确认删除</button></div>`)}
+  if(M.type==='recdel'){const r=REC(M.rid);const a=APP(r.app);const by=refBy(r.id);const fs=[];S.projects.forEach(p=>p.findings.forEach(f=>{if(f.rids.includes(r.id))fs.push(f)}));
+    return wrap('删除体验记录',`<div class="row" style="flex-wrap:nowrap;align-items:flex-start">${shotsHTML(r,1)}<div><b>${h(a.name)}</b> · ${h(SC(r.scene))} · <span class="mono">${h(r.version)}</span> · ${h(r.date)}<p class="small" style="margin-top:4px">${h(r.changes)}</p></div></div>
+    ${by.length||fs.length?`<div class="note warn">${by.length?`这条记录被 ${by.length} 个项目引用（${by.map(({p})=>h(p.group+'-'+p.name)).join('、')}），删除后这些项目将失去这条证据，相关场景会标为需补采。`:''}${fs.length?`<br>有 ${fs.length} 条发现引用了它：${fs.map(f=>'「'+h(f.title)+'」').join('、')}。`:''}</div>`:'<div class="note">这条记录没有被任何项目引用。</div>'}<p class="small muted">删除后无法恢复。只想修正内容的话，可以改用「编辑」，会保留历史版本。</p>`,
+    `<span></span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn danger-fill" data-act="rec-del-do">确认删除</button></div>`)}
+  if(M.type==='cardnew'){const p=PROJ(M.pid),D=M.d;const avail=S.apps.filter(a=>!p.apps.some(e=>e.id===a.id));
+    return wrap('新建竞品卡片',`<div class="row"><label class="tgl ${D.mode==='archive'?'on':''}"><input type="radio" name="cnm" data-act="cn-mode" data-v="archive" ${D.mode==='archive'?'checked':''}>从竞品档案选择</label><label class="tgl ${D.mode==='new'?'on':''}"><input type="radio" name="cnm" data-act="cn-mode" data-v="new" ${D.mode==='new'?'checked':''}>新建 App</label></div>
+    ${D.mode==='archive'?(avail.length?`<div class="srclist" style="max-height:240px">${avail.map(a=>{const n=S.records.filter(r=>r.app===a.id).length;return `<label class="srcitem"><input type="checkbox" data-act="cn-pick" data-app="${a.id}" ${D.pick.includes(a.id)?'checked':''}>${markHTML(a,22)}<span class="si-n">${h(a.name)}</span><span class="si-m">${h(a.platform)} · ${h(a.channel)} · 档案 ${n} 条记录</span></label>`}).join('')}</div>`:'<div class="note">竞品档案中的 App 都已在本项目里。可以切换到「新建 App」。</div>')
+    :`<div class="grid3"><div class="field"><label for="cn-n">App 名称</label><input type="text" id="cn-n" data-bind="modal.d.name" value="${h(D.name)}" placeholder="例如：云杉银行"></div><div class="field"><label for="cn-m">标识字</label><input type="text" id="cn-m" maxlength="1" data-bind="modal.d.mark" value="${h(D.mark)}" placeholder="默认取名称首字"></div><div class="field"><label for="cn-c">标识颜色</label><input type="color" id="cn-c" data-bind="modal.d.color" value="${h(D.color)}" style="height:36px;width:100%;border:1px solid var(--line-2);border-radius:6px;background:var(--panel)"></div></div>
+    <div class="grid3"><div class="field"><label for="cn-p">平台</label><select id="cn-p" data-bind="modal.d.platform">${['iOS','Android','HarmonyOS','iPadOS','Web / H5'].map(x=>`<option ${x===D.platform?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label for="cn-ch">渠道</label><input type="text" id="cn-ch" list="chs2" data-bind="modal.d.channel" value="${h(D.channel)}"><datalist id="chs2"><option>App Store</option><option>华为应用市场</option><option>鸿蒙应用市场</option><option>应用宝</option><option>小米应用商店</option></datalist></div><div class="field"><label for="cn-v">当前商店版本</label><input type="text" id="cn-v" class="mono" data-bind="modal.d.v" value="${h(D.v)}" placeholder="例如 6.2.0"><span class="hint">手动登记，暂不接商店接口</span></div></div>`}
+    <div class="field"><span class="flabel">在本项目中调查的场景</span><div class="row">${p.scenes.map(s=>`<label class="tgl ${D.scenes.includes(s)?'on':''}"><input type="checkbox" data-act="cn-scene" data-scene="${s}" ${D.scenes.includes(s)?'checked':''}>${h(SC(s))}</label>`).join('')}</div></div>
+    <label class="check small"><input type="checkbox" data-bind="modal.d.reuse" ${D.reuse?'checked':''}>自动引用档案中同场景的最新记录，没有记录的场景标为需补采</label>${M.err?`<div class="note warn">${h(M.err)}</div>`:''}`,
+    `<span></span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn pri" data-act="cn-save">新建竞品卡片</button></div>`)}
+  if(M.type==='reset') return wrap('重置演示数据',`<p>将清除你在本浏览器中新增的记录、项目、引用与审阅结果，恢复到初始演示数据。此操作无法撤销。</p>`,`<span></span><div class="row"><button class="btn" data-act="close">取消</button><button class="btn pri" data-act="reset-do">确认重置</button></div>`);
+  return '';
+}
+function parseScenes(t){return [...new Set(String(t||'').split(/[、,，;；\n]+/).map(x=>x.trim()).filter(Boolean))]}
+function srcLabel(id){const p=PROJ(id);return p?`使用「${p.group}-${p.name}」项目竞品`:'不使用'}
+function wizApps(){const W=UI.wiz;const src=PROJ(W.source);if(!src)return [];return src.apps.filter(e=>APP(e.id)&&W.apps[e.id]!==false).map(e=>e.id)}
+function wizPreview(){const W=UI.wiz,out={};if(!W)return out;const names=parseScenes(W.sceneText);for(const id of wizApps())for(const n of names){const sc=S.scenes.find(x=>x.name===n);const r=sc?S.records.filter(x=>x.app===id&&x.scene===sc.id).sort(byDate)[0]:null;out[id+'|'+n]=r||null}return out}
+function wizSummary(){const W=UI.wiz;if(!W.source)return '不复用竞品：创建后可在「编辑项目范围」中添加';const v=Object.values(wizPreview());const reuse=v.filter(Boolean).length;return `${wizApps().length} 款竞品 · 将复用 ${W.reuse?reuse:0} 条记录 · ${W.reuse?v.length-reuse:v.length} 个场景需补采`}
+function openWizard(preset){
+  UI.wiz=Object.assign({group:'银行产品',name:'',role:(S.projects[0]||{}).role||'',question:'',sceneText:'',dims:'',source:'',apps:{},reuse:true,addingTag:false,newTag:''},preset||{});
+  UI.modal={type:'wiz'}; renderModal();
+}
+function comboOpts(){return [{v:'',l:'不使用'},...S.projects.map(p=>({v:p.id,l:srcLabel(p.id)}))]}
+function setupCombo(inp){
+  const list=document.getElementById('wz-src-list');let act=0;
+  const show=q=>{const all=comboOpts();const ql=(q||'').trim().toLowerCase();const m=(!ql||q===srcLabel(UI.wiz.source))?all:all.filter(o=>o.l.toLowerCase().includes(ql));
+    act=Math.max(0,Math.min(act,m.length-1));
+    list.innerHTML=m.length?m.map((o,i)=>`<li role="option" id="wz-opt-${i}" data-v="${o.v}" class="${o.v===UI.wiz.source?'cur':''} ${i===act?'act':''}" aria-selected="${o.v===UI.wiz.source}">${h(o.l)}</li>`).join(''):'<li class="none">没有匹配的项目</li>';
+    list.hidden=false;inp.setAttribute('aria-expanded','true');list._m=m};
+  const pick=v=>{UI.wiz.source=v;UI.wiz.apps={};UI.modal.err=null;renderModal()};
+  inp.addEventListener('focus',()=>{act=0;inp.select();show('')});
+  inp.addEventListener('input',()=>{act=0;show(inp.value)});
+  inp.addEventListener('keydown',e=>{if(list.hidden)return;const m=list._m||[];
+    if(e.key==='ArrowDown'){e.preventDefault();act=Math.min(act+1,m.length-1);show(inp.value)}
+    else if(e.key==='ArrowUp'){e.preventDefault();act=Math.max(act-1,0);show(inp.value)}
+    else if(e.key==='Enter'){e.preventDefault();if(m[act])pick(m[act].v)}
+    else if(e.key==='Escape'){e.stopPropagation();list.hidden=true;inp.value=srcLabel(UI.wiz.source)}});
+  inp.addEventListener('blur',()=>setTimeout(()=>{if(!document.body.contains(list))return;list.hidden=true;inp.setAttribute('aria-expanded','false');inp.value=srcLabel(UI.wiz.source)},150));
+  list.addEventListener('mousedown',e=>{e.preventDefault();const li=e.target.closest('li[data-v]');if(li)pick(li.dataset.v)});
+}
+
+// ================= 渲染 =================
+function render(){
+  const R=route(); const side=document.getElementById('side'); side.innerHTML=sidebar(R); side.classList.toggle('open',UI.sideOpen);
+  let html='';
+  try{
+    const p=R.a&&PROJ(R.a);
+    if(R.v==='home') html=viewHome();
+    else if(R.v==='archive'&&!R.a) html=viewArchiveIndex();
+    else if(R.v==='archive'&&APP(R.a)) html=viewArchive(APP(R.a));
+    else if(R.v==='compare'&&APP(R.a)) html=viewCompare(APP(R.a));
+    else if(R.v==='project'&&p) html=viewProject(p);
+    else if(R.v==='module'&&p&&APP(R.b)){p.seen=p.seen||{};const sv=storeLatest(APP(R.b));if(p.seen[R.b]!==sv.v){p.seen[R.b]=sv.v;save(true);side.innerHTML=sidebar(R)}html=viewModule(p,APP(R.b))}
+    else if(R.v==='scope'&&p) html=viewScope(p);
+    else if(R.v==='rescope'&&p) html=viewRescope(p);
+    else if(R.v==='findings'&&p) html=viewFindings(p);
+    else if(R.v==='finding'&&p&&p.findings.find(f=>f.id===R.b)) html=viewFinding(p,p.findings.find(f=>f.id===R.b));
+    else html=`<div class="wrap"><div class="panel pad">没有找到这个页面。<a href="#home">回到首页</a></div></div>`;
+  }catch(err){console.error(err);html=`<div class="wrap"><div class="note warn">页面渲染出错：${h(err.message)}</div></div>`}
+  const main=document.getElementById('main'); main.innerHTML=`<div class="topbar"><button class="btn sm" data-act="side">☰ 项目</button><b>观微</b></div>`+html;
+  if(UI.lastRoute!==R.raw){main.scrollTop=0;window.scrollTo(0,0);UI.lastRoute=R.raw}
+  if(UI.focus&&UI.focusDone!==UI.focus+R.raw){const el=document.getElementById('tl-'+UI.focus)||document.getElementById('rv-'+UI.focus);if(el){el.scrollIntoView({block:'center'});UI.focusDone=UI.focus+R.raw}}
+  renderModal();
+}
+function renderModal(){document.getElementById('modal').innerHTML=modalHTML();const ci=document.getElementById('wz-src-in');if(ci)setupCombo(ci);const d=document.getElementById('drop');if(d){['dragover','dragenter'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));['dragleave','drop'].forEach(ev=>d.addEventListener(ev,()=>d.classList.remove('over')));d.addEventListener('drop',e=>{e.preventDefault();addFiles(e.dataTransfer.files)})}}
+
+// ================= 交互 =================
+function setPath(path,val){const ks=path.split('.');let o=UI;for(let i=0;i<ks.length-1;i++){if(o[ks[i]]==null)o[ks[i]]={};o=o[ks[i]]}o[ks[ks.length-1]]=val}
+function compress(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const img=new Image();img.onload=()=>{const sc=Math.min(1,480/img.width,2000/img.height);const c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.78))};img.onerror=rej;img.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
+async function addFiles(files){if(!UI.modal||UI.modal.type!=='record')return;for(const f of files){if(!/^image\//.test(f.type))continue;try{UI.modal.d.shots.push({kind:'img',src:await compress(f)})}catch(e){toast('有一张图片无法读取，已跳过')}}renderModal()}
+function newRecordDraft(ctx){const a=APP(ctx.app||S.apps[0].id);return {app:a.id,scene:ctx.scene||'home',version:storeLatest(a).v,platform:a.platform,channel:a.channel,date:todayISO(),author:'研究员',shots:[],noChange:false,changes:'',feeling:'',cause:'',causeSpec:true}}
+function addRef(p,rid,scene,via){const f=p.refs.find(x=>x.rid===rid);if(f){f.scene=scene;f.active=true}else p.refs.push({rid,scene,active:true,added:todayISO(),via:via||''});const r=REC(rid);delete p.gaps[r.app+'|'+scene]}
+
+const ACT={
+  side(){UI.sideOpen=!UI.sideOpen;document.getElementById('side').classList.toggle('open',UI.sideOpen)},
+  go(t){const to=t.dataset.to;if(t.dataset.branch){const [,pid,app]=to.split('-');UI.branch[pid+'|'+app]=t.dataset.branch}UI.focus=t.dataset.focus||null;if(t.dataset.scene!==undefined){UI.cmpScene=t.dataset.scene;delete UI.ab[to.split('-')[1]]}go(to)},
+  'new-project'(){openWizard()},
+  'compose-create'(){const q=document.getElementById('composer').value.trim();openWizard({question:q})},
+  'quick-example'(){const pa=PROJ('pa')||S.projects[0];openWizard({group:pa.group,name:'卡包页（示例副本）',role:pa.role,question:'卡包页如何组织借记卡、信用卡与电子钱包？用户从资产入口到卡包要走几步？',sceneText:'资产入口、卡包页结构',dims:'卡片分组，资产入口路径，快捷操作',source:pa.id})},
+  filter(t){UI.filters[t.dataset.pid][t.dataset.k]=t.dataset.v;render()},
+  branch(t){UI.branch[t.dataset.key]=t.dataset.scene;UI.focus=null;render()},
+  'record-form'(t){const ctx={pid:t.dataset.pid,app:t.dataset.app,scene:t.dataset.scene};UI.modal={type:'record',pid:ctx.pid,d:newRecordDraft(ctx)};renderModal();const el=document.getElementById('rf-v');el&&el.focus()},
+  'rf-rm'(t){UI.modal.d.shots.splice(+t.dataset.i,1);renderModal()},
+  'rf-save'(){const M=UI.modal,D=M.d;D.version=(D.version||'').trim();
+    if(!D.version||!D.date){M.err='请填写实测版本号和采集日期。';return renderModal()}
+    if(!D.noChange&&!D.changes.trim()){M.err='请写下观察到的变化；如果复查后没有变化，请勾选“复查后未发现明显变化”。';return renderModal()}
+    if(M.editId){const r=REC(M.editId);const keys=['scene','version','platform','channel','date','changes','feeling','cause','causeSpec','noChange','author'];
+      (r.history=r.history||[]).push({at:todayISO(),shots:(r.shots||[]).length,...Object.fromEntries(keys.map(k=>[k,r[k]]))});
+      Object.assign(r,{scene:D.scene,version:D.version,platform:D.platform,channel:(D.channel||'').trim(),date:D.date,shots:D.shots,changes:D.changes.trim()||(D.noChange?'复查后未发现明显变化。':''),feeling:D.feeling.trim(),cause:D.cause.trim(),causeSpec:!!D.causeSpec&&!!D.cause.trim(),noChange:!!D.noChange,author:D.author||r.author,edited:todayISO()});
+      S.projects.forEach(p=>{if(p.reviews[r.id])p.reviews[r.id].stale=true});
+      save();UI.modal=null;UI.focus=r.id;UI.focusDone=null;render();toast('已保存修改，修改前的内容已作为历史版本保留');return}
+    const r={id:uid('r'),app:D.app,scene:D.scene,version:D.version,platform:D.platform,channel:D.channel.trim(),date:D.date,shots:D.shots,changes:D.changes.trim()||(D.noChange?'复查后未发现明显变化。':''),feeling:D.feeling.trim(),cause:D.cause.trim(),causeSpec:!!D.causeSpec&&!!D.cause.trim(),noChange:!!D.noChange,author:D.author||'研究员',demo:false,created:todayISO()};
+    S.records.push(r);let msg='已保存到竞品档案';
+    if(M.pid){const p=PROJ(M.pid);const e=p.apps.find(x=>x.id===r.app);if(e&&!e.scenes.includes(r.scene))e.scenes.push(r.scene);if(p.scenes.includes(r.scene)){addRef(p,r.id,r.scene);delete p.flags[r.app+'|'+r.scene];const st=statusOf(p,r.app,r.scene);msg=`已保存并引用到本项目 · ${SC(r.scene)}状态：${st.label}`;UI.branch[p.id+'|'+r.app]=r.scene;UI.focus=r.id}}
+    else UI.focus=r.id;
+    save();UI.modal=null;render();toast(msg)},
+  'store-form'(t){const a=APP(t.dataset.app)||S.apps[0];UI.modal={type:'store',d:{app:a.id,v:'',d:todayISO(),note:'',sim:false}};renderModal()},
+  'sf-sim'(){const D=UI.modal.d;D.v=bumpVer(storeLatest(APP(D.app)).v);D.note=D.note||'模拟更新：版本说明待补充';D.sim=true;D.d=todayISO();renderModal()},
+  'sf-save'(){const M=UI.modal,D=M.d;const a=APP(D.app);D.v=(D.v||'').trim();if(!D.v){M.err='请填写版本号，或点“填入模拟版本”。';return renderModal()}if(a.store.some(s=>s.v===D.v)){M.err='该版本已登记过。';return renderModal()}
+    a.store.push({id:uid('s'),v:D.v,d:D.d||todayISO(),note:D.note.trim(),src:D.sim?'模拟更新 · 演示':'手动登记'});save();UI.modal=null;render();toast(`已登记 ${a.name} ${D.v}，相关项目的场景状态已更新`)},
+  flag(t){const p=PROJ(t.dataset.pid),k=t.dataset.app+'|'+t.dataset.scene;if(p.flags[k])delete p.flags[k];else p.flags[k]={note:'研究员标记为待复查',at:todayISO()};save();render()},
+  'ref-picker'(t){UI.modal={type:'refpick',pid:t.dataset.pid,app:t.dataset.app,scene:t.dataset.scene};renderModal()},
+  'ref-add'(t){const M=UI.modal,p=PROJ(M.pid);addRef(p,t.dataset.rid,M.scene,'archive');save();UI.modal=null;render();toast('已引用，原始记录未改动')},
+  'ai-run'(t){const p=PROJ(t.dataset.pid);const recs=activeRecs(p,t.dataset.app,t.dataset.scene);let n=0;recs.forEach(r=>{if(!p.reviews[r.id]){p.reviews[r.id]={sug:aiSuggest(r,p),state:'pending'};n++}});save();render();toast(n?`模拟 AI 已整理 ${n} 条记录，请逐条审阅`:'这些记录都已整理过')},
+  'ai-one'(t){const p=PROJ(t.dataset.pid);p.reviews[t.dataset.rid]={sug:aiSuggest(REC(t.dataset.rid),p),state:'pending'};save();render()},
+  'rv-keep'(t){const p=PROJ(t.dataset.pid),rv=p.reviews[t.dataset.rid];delete rv.stale;rv.state='kept';rv.final=originalText(REC(t.dataset.rid));rv.at=todayISO();save();render();toast('已保留原文作为审核结论')},
+  'rv-adopt'(t){const p=PROJ(t.dataset.pid),rv=p.reviews[t.dataset.rid];delete rv.stale;rv.state='adopted';rv.final=rv.sug.text;rv.at=todayISO();save();render();toast('已采纳建议，原始记录保持不变')},
+  'rv-edit'(t){const p=PROJ(t.dataset.pid);UI.editing[p.id+'|'+t.dataset.rid]=p.reviews[t.dataset.rid].sug.text;render();const el=document.getElementById('ed-'+t.dataset.rid);el&&el.focus()},
+  'rv-edit-cancel'(t){delete UI.editing[t.dataset.pid+'|'+t.dataset.rid];render()},
+  'rv-edit-save'(t){const k=t.dataset.pid+'|'+t.dataset.rid;const p=PROJ(t.dataset.pid),rv=p.reviews[t.dataset.rid];const v=(UI.editing[k]||'').trim();if(!v)return toast('内容不能为空');rv.state='edited';rv.final=v;delete rv.stale;rv.at=todayISO();delete UI.editing[k];save();render();toast('已保存编辑后的结论')},
+  'rv-reset'(t){const p=PROJ(t.dataset.pid);const rv=p.reviews[t.dataset.rid];rv.state='pending';delete rv.final;rv.sug=aiSuggest(REC(t.dataset.rid),p);delete rv.stale;delete rv.demo;save();render()},
+  'finding-new'(t){const p=PROJ(t.dataset.pid);const rid=t.dataset.rid;let title='',body='';if(rid){const rv=p.reviews[rid];const r=REC(rid);const first=(rv.final||'').split('\n')[0].replace(/^结论[^：]*：/,'');title=`${APP(r.app).name}：${first.slice(0,30)}`;body=first}
+    UI.modal={type:'finding',pid:p.id,d:{type:'single',title,body,rids:rid?[rid]:[],confirm:true}};renderModal()},
+  'fd-type'(t){const D=UI.modal.d;D.type=t.dataset.v;D.confirm=D.type==='single';renderModal()},
+  'fd-rid'(t){const D=UI.modal.d;const i=D.rids.indexOf(t.dataset.rid);if(i>=0)D.rids.splice(i,1);else D.rids.push(t.dataset.rid);renderModal()},
+  'fd-save'(){const M=UI.modal,D=M.d,p=PROJ(M.pid);const apps=[...new Set(D.rids.map(id=>REC(id).app))];
+    if(!D.title.trim()){M.err='请填写发现标题。';return renderModal()}if(!D.rids.length){M.err='至少选择一条已审核记录作为证据。';return renderModal()}if(D.type==='trend'&&apps.length<2){M.err='跨产品趋势需要至少 2 款 App 的证据。';return renderModal()}
+    const f={id:uid('f'),type:D.type,status:D.confirm?'confirmed':'candidate',title:D.title.trim(),body:D.body.trim(),rids:D.rids.slice(),apps,scene:REC(D.rids[0]).scene,created:todayISO(),confirmed:D.confirm?todayISO():null};
+    p.findings.unshift(f);save();UI.modal=null;UI.newFinding=f.id;go('findings-'+p.id);toast(D.confirm?'发现已确认并加入项目汇总':'已作为候选加入项目汇总')},
+  'finding-confirm'(t){const p=PROJ(t.dataset.pid),f=p.findings.find(x=>x.id===t.dataset.fid);f.status='confirmed';f.confirmed=todayISO();save();render();toast('已确认并加入项目汇总')},
+  img(t){UI.modal={type:'img',rid:t.dataset.rid,i:+t.dataset.i};renderModal()},
+  'img-step'(t){const r=REC(UI.modal.rid);UI.modal.i=(UI.modal.i+ +t.dataset.d+r.shots.length)%r.shots.length;renderModal()},
+  pick(t){const ab=UI.ab[t.dataset.app]||(UI.ab[t.dataset.app]=[]);const i=+t.dataset.i;ab[i]=ab[i]===t.dataset.rid?undefined:t.dataset.rid;if(ab[1-i]===t.dataset.rid&&ab[i])ab[1-i]=undefined;render()},
+  'cmp-pair'(t,e){e&&e.preventDefault();UI.ab[t.dataset.app]=[t.dataset.a,t.dataset.b];go('compare-'+t.dataset.app)},
+  'cmp-swap'(t){const ab=UI.ab[t.dataset.app];UI.ab[t.dataset.app]=[ab[1],ab[0]];render()},
+  'arch-scene'(t){UI.archScene[t.dataset.app]=t.dataset.v;render()},
+  'scope-scene'(t){const D=UI.scope[t.dataset.pid];const s=t.dataset.scene;const i=D.scenes.indexOf(s);if(i>=0)D.scenes.splice(i,1);else{D.scenes.push(s);D.apps.forEach(e=>{if(!e.scenes.includes(s))e.scenes.push(s)})}render()},
+  'scope-add-scene'(t){const D=UI.scope[t.dataset.pid];const n=(D.newScene||'').trim();if(!n)return toast('请先输入场景名称');let s=S.scenes.find(x=>x.name===n);if(!s){s={id:'sc'+Date.now().toString(36),name:n,desc:''};S.scenes.push(s);save()}if(!D.scenes.includes(s.id)){D.scenes.push(s.id);D.apps.forEach(e=>e.scenes.push(s.id))}D.newScene='';render()},
+  'scope-cell'(t){const e=UI.scope[t.dataset.pid].apps.find(x=>x.id===t.dataset.app);const i=e.scenes.indexOf(t.dataset.scene);if(i>=0)e.scenes.splice(i,1);else e.scenes.push(t.dataset.scene)},
+  'scope-rm-app'(t){const D=UI.scope[t.dataset.pid];D.apps=D.apps.filter(e=>e.id!==t.dataset.app);render()},
+  'scope-cancel'(t){delete UI.scope[t.dataset.pid];go('project-'+t.dataset.pid)},
+  'scope-save'(t){const p=PROJ(t.dataset.pid),D=UI.scope[p.id];if(!D.question.trim())return toast('研究问题不能为空');if(!D.scenes.length)return toast('至少保留一个业务场景');
+    const changed=D.question.trim()!==p.question||D.scenes.slice().sort().join()!==p.scenes.slice().sort().join();
+    if(changed)p.history.push({at:todayISO(),question:p.question,scenes:p.scenes.slice()});
+    Object.assign(p,{group:D.group.trim()||p.group,name:D.name.trim()||p.name,role:D.role.trim(),question:D.question.trim(),scenes:D.scenes.slice(),dims:D.dims.split(/[,，、]/).map(s=>s.trim()).filter(Boolean),apps:D.apps.map(e=>({id:e.id,scenes:e.scenes.slice()}))});
+    // 不在范围内的引用标为范围外，但保留
+    p.refs.forEach(f=>{if(!p.scenes.includes(f.scene))f.active=false});
+    delete UI.scope[p.id];delete UI.rescope[p.id];save();
+    if(changed){go('rescope-'+p.id);toast('研究范围已更新：请重新选择适用记录，先前引用的材料都还在')}else{go('project-'+p.id);toast('项目范围已保存')}},
+  'rs-gap'(t){const D=UI.rescope[t.dataset.pid];D.gaps[t.dataset.k]=t.checked;render()},
+  'rescope-save'(t){const p=PROJ(t.dataset.pid),D=rescopeDraft(p);
+    p.refs.forEach(f=>{const v=D.map[f.rid];if(v){f.scene=v;f.active=true}else f.active=false});
+    Object.entries(D.add).forEach(([rid,s])=>{if(s)p.refs.push({rid,scene:s,active:true,added:todayISO(),via:'rescope'})});
+    const cov=coverage(p,D);p.gaps={};p.apps.forEach(e=>projScenes(p,e.id).forEach(s=>{const k=e.id+'|'+s;if(!cov[k]&&(D.gaps[k]!==undefined?D.gaps[k]:true))p.gaps[k]=true}));
+    delete UI.rescope[p.id];save();go('project-'+p.id);toast(`引用已调整：${p.refs.filter(f=>f.active).length} 条适用，${p.refs.filter(f=>!f.active).length} 条保留在先前引用，${Object.keys(p.gaps).length} 个场景需补采`)},
+  'wz-tag-add'(t){const W=UI.wiz;const n=S.sceneTags[+t.dataset.i];const cur=parseScenes(W.sceneText);if(!cur.includes(n))cur.push(n);W.sceneText=cur.join('、');renderModal()},
+  'wz-tag-del'(t){const W=UI.wiz;const i=+t.dataset.i;const n=S.sceneTags[i];S.sceneTags.splice(i,1);W.sceneText=parseScenes(W.sceneText).filter(x=>x!==n).join('、');save();renderModal();toast(`已删除场景标签「${n}」，档案里的记录不受影响`)},
+  'wz-tag-new'(){UI.wiz.addingTag=true;UI.wiz.newTag='';renderModal();const el=document.getElementById('wz-newtag');el&&el.focus()},
+  'wz-tag-cancel'(){UI.wiz.addingTag=false;renderModal()},
+  'wz-tag-save'(){const W=UI.wiz;const n=(W.newTag||'').trim();if(!n)return toast('请输入场景名称');if(S.sceneTags.includes(n))return toast('已经有这个场景标签');if(S.sceneTags.length>=6)return toast('最多 6 个场景标签，请先删除一个');S.sceneTags.push(n);W.addingTag=false;W.newTag='';save();renderModal()},
+  'wz-app'(t){UI.wiz.apps[t.dataset.app]=t.checked;renderModal()},
+  'wz-all'(){const W=UI.wiz;const src=PROJ(W.source);const allOn=src.apps.every(e=>W.apps[e.id]!==false);src.apps.forEach(e=>{W.apps[e.id]=!allOn});renderModal()},
+  'wz-create'(){const W=UI.wiz,M=UI.modal;const names=parseScenes(W.sceneText);
+    if(!W.name.trim()){M.err='请填写项目名称（会显示在左侧二级菜单）。';return renderModal()}if(!W.question.trim()){M.err='请写下研究问题。';return renderModal()}if(!names.length){M.err='请至少填入一个业务场景：点标签左侧的 ＋，或直接输入。';return renderModal()}
+    const sceneIds=names.map(n=>{let x=S.scenes.find(y=>y.name===n);if(!x){x={id:'sc'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:n,desc:''};S.scenes.push(x)}return x.id});
+    const apps=wizApps().map(id=>({id,scenes:sceneIds.slice()}));
+    const p={id:'p'+Date.now().toString(36),group:W.group.trim()||'未分类',name:W.name.trim(),role:W.role.trim(),question:W.question.trim(),scenes:sceneIds,dims:W.dims.split(/[,，、]/).map(x=>x.trim()).filter(Boolean),apps,refs:[],flags:{},gaps:{},reviews:{},findings:[],history:[],seen:{},created:todayISO()};
+    if(W.source){const src=PROJ(W.source);p.origin={from:src.id,note:`由「${src.name}」项目复用 ${apps.length} 个竞品模块${W.reuse?'与同场景记录':''}`}}
+    apps.forEach(e=>e.scenes.forEach(sid=>{const r=S.records.filter(x=>x.app===e.id&&x.scene===sid).sort(byDate)[0];if(r&&W.reuse)p.refs.push({rid:r.id,scene:sid,active:true,added:todayISO(),via:W.source||'archive'});else p.gaps[e.id+'|'+sid]=true}));
+    S.projects.push(p);save();UI.modal=null;UI.wiz=null;go('project-'+p.id);toast(`已创建「${p.group}-${p.name}」：${apps.length} 款竞品，复用 ${p.refs.length} 条记录，${Object.keys(p.gaps).length} 个场景需补采`)},
+  'card-manage'(t){const pid=t.dataset.pid;if(UI.manage[pid])delete UI.manage[pid];else UI.manage[pid]=[];render()},
+  'card-pick'(t){const L=UI.manage[t.dataset.pid];const i=L.indexOf(t.dataset.app);if(i>=0)L.splice(i,1);else L.push(t.dataset.app);render()},
+  'card-clear'(t){UI.manage[t.dataset.pid]=[];render()},
+  'card-del'(t){UI.modal={type:'carddel',pid:t.dataset.pid};renderModal()},
+  'card-del-do'(){const p=PROJ(UI.modal.pid);const ids=UI.manage[p.id]||[];
+    p.apps=p.apps.filter(e=>!ids.includes(e.id));p.refs=p.refs.filter(f=>{const r=REC(f.rid);return !r||!ids.includes(r.app)});
+    [p.gaps,p.flags].forEach(o=>Object.keys(o).forEach(k=>{if(ids.includes(k.split('|')[0]))delete o[k]}));ids.forEach(id=>{if(p.seen)delete p.seen[id]});
+    delete UI.manage[p.id];save();UI.modal=null;render();toast(`已从本项目移除 ${ids.length} 个竞品卡片，档案中的 App 与记录仍保留`)},
+  'card-new'(t){const p=PROJ(t.dataset.pid);UI.modal={type:'cardnew',pid:p.id,d:{mode:S.apps.some(a=>!p.apps.some(e=>e.id===a.id))?'archive':'new',pick:[],scenes:p.scenes.slice(),reuse:true,name:'',mark:'',platform:'iOS',channel:'App Store',v:'',color:'#5B6B7A'}};renderModal()},
+  'cn-mode'(t){UI.modal.d.mode=t.dataset.v;UI.modal.err=null;renderModal()},
+  'cn-pick'(t){const L=UI.modal.d.pick;const i=L.indexOf(t.dataset.app);if(i>=0)L.splice(i,1);else L.push(t.dataset.app);renderModal()},
+  'cn-scene'(t){const L=UI.modal.d.scenes;const i=L.indexOf(t.dataset.scene);if(i>=0)L.splice(i,1);else L.push(t.dataset.scene);renderModal()},
+  'cn-save'(){const M=UI.modal,D=M.d,p=PROJ(M.pid);let ids=[];
+    if(!D.scenes.length){M.err='至少选择一个要调查的业务场景。';return renderModal()}
+    if(D.mode==='archive'){if(!D.pick.length){M.err='请至少选择一款 App。';return renderModal()}ids=D.pick.slice()}
+    else{const n=(D.name||'').trim(),v=(D.v||'').trim();if(!n||!v){M.err='请填写 App 名称和当前商店版本号。';return renderModal()}if(S.apps.some(a=>a.name===n)){M.err='竞品档案中已有同名 App，请改用「从竞品档案选择」。';return renderModal()}
+      const a={id:'a'+Date.now().toString(36),name:n,mark:((D.mark||'').trim()||n.replace(/银行$/,'')[0]||n[0]).slice(0,1),color:D.color||'#5B6B7A',platform:D.platform,channel:(D.channel||'').trim(),demo:false,store:[{id:uid('s'),v,d:todayISO(),note:'',src:'手动登记'}]};S.apps.push(a);ids=[a.id]}
+    let reused=0,miss=0;ids.forEach(id=>{p.apps.push({id,scenes:D.scenes.slice()});D.scenes.forEach(sid=>{const r=S.records.filter(x=>x.app===id&&x.scene===sid).sort(byDate)[0];if(r&&D.reuse){addRef(p,r.id,sid,'archive');reused++}else{p.gaps[id+'|'+sid]=true;miss++}})});
+    save();UI.modal=null;render();toast(`已新建 ${ids.length} 个竞品卡片：复用 ${reused} 条记录，${miss} 个场景需补采`)},
+  'rec-edit'(t){const r=REC(t.dataset.rid);UI.modal={type:'record',editId:r.id,d:{app:r.app,scene:r.scene,version:r.version,platform:r.platform,channel:r.channel||'',date:r.date,author:r.author||'研究员',shots:(r.shots||[]).slice(),noChange:!!r.noChange,changes:r.changes||'',feeling:r.feeling||'',cause:r.cause||'',causeSpec:!!r.causeSpec}};renderModal()},
+  'rec-del'(t){UI.modal={type:'recdel',rid:t.dataset.rid};renderModal()},
+  'rec-del-do'(){const rid=UI.modal.rid;const r=REC(rid);
+    S.projects.forEach(p=>{const had=p.refs.filter(f=>f.rid===rid);p.refs=p.refs.filter(f=>f.rid!==rid);delete p.reviews[rid];
+      had.forEach(f=>{if(f.active&&!activeRecs(p,r.app,f.scene).filter(x=>x.id!==rid).length)p.gaps[r.app+'|'+f.scene]=true});
+      p.findings.forEach(f=>{const i=f.rids.indexOf(rid);if(i>=0){f.rids.splice(i,1);f.removed=(f.removed||0)+1}})});
+    S.records=S.records.filter(x=>x.id!==rid);Object.values(UI.ab).forEach(ab=>{[0,1].forEach(i=>{if(ab[i]===rid)ab[i]=undefined})});
+    save();UI.modal=null;render();toast('记录已删除，相关项目的引用与状态已更新')},
+  reset(){UI.modal={type:'reset'};renderModal()},
+  'reset-do'(){S=seedData();save();Object.assign(UI,{filters:{},branch:{},ab:{},archScene:{},editing:{},focus:null,modal:null,wiz:null,scope:{},rescope:{}});go('home');render();toast('已恢复演示数据')},
+  close(){UI.modal=null;renderModal()},
+  scrim(t,e){if(e.target===t){UI.modal=null;renderModal()}},
+};
+document.addEventListener('click',e=>{
+  if(UI.sideOpen&&!e.target.closest('#side')&&!e.target.closest('[data-act="side"]')){UI.sideOpen=false;document.getElementById('side').classList.remove('open')}
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const act=t.dataset.act; if(!ACT[act]) return;
+  if(t.tagName==='A') e.preventDefault();
+  if(t.classList.contains('ccard')&&e.target.closest('button,a')&&e.target.closest('button,a')!==t) return;
+  if(act==='scrim'&&e.target!==t) return;
+  ACT[act](t,e);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&UI.modal){UI.modal=null;renderModal()}
+  if(e.key==='Enter'&&e.target.id==='composer'&&!e.shiftKey){e.preventDefault();ACT['compose-create']()}
+  if(e.key==='Enter'&&e.target.id==='wz-newtag'){e.preventDefault();ACT['wz-tag-save']()}
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('ccard')){e.preventDefault();ACT[e.target.dataset.act](e.target,e)}
+});
+document.addEventListener('input',e=>{const b=e.target.dataset&&e.target.dataset.bind;if(!b)return;if(e.target.type==='checkbox')return;setPath(b,e.target.value);
+  if(b==='wiz.sceneText'){const el=document.getElementById('wz-sum');if(el)el.textContent=wizSummary();const cur=parseScenes(UI.wiz.sceneText);document.querySelectorAll('.stag').forEach((x,i)=>x.classList.toggle('on',cur.includes(S.sceneTags[i])))}});
+document.addEventListener('change',e=>{
+  const t=e.target,b=t.dataset.bind;
+  if(b){setPath(b,t.type==='checkbox'?t.checked:t.value);
+    if(b==='modal.d.app'&&UI.modal.type==='record'){const a=APP(t.value);Object.assign(UI.modal.d,{version:storeLatest(a).v,platform:a.platform,channel:a.channel})}
+    if(t.dataset.rerender){renderModal();return}}
+  const on=t.dataset.on;
+  if(on==='files'){addFiles(t.files);return}
+  if(on==='cmp-sel'){const ab=UI.ab[t.dataset.app];ab[+t.dataset.i]=t.value;render()}
+  if(on==='rs-map'){const D=UI.rescope[t.dataset.pid];if(t.dataset.kind==='map')D.map[t.dataset.rid]=t.value;else{if(t.value)D.add[t.dataset.rid]=t.value;else delete D.add[t.dataset.rid]}render()}
+  if(on==='scope-add-app'&&t.value){UI.scope[t.dataset.pid].apps.push({id:t.value,scenes:UI.scope[t.dataset.pid].scenes.slice()});render()}
+  if(on==='scope-import'&&t.value){const D=UI.scope[t.dataset.pid];const src=PROJ(t.value);let n=0;src.apps.forEach(e=>{if(!D.apps.some(x=>x.id===e.id)){D.apps.push({id:e.id,scenes:D.scenes.slice()});n++}});render();toast(n?`已从「${src.name}」导入 ${n} 个竞品模块`:'这些竞品已在项目中')}
+});
+document.addEventListener('paste',e=>{if(UI.modal&&UI.modal.type==='record'){const fs=[...(e.clipboardData||{}).files||[]];if(fs.length){e.preventDefault();addFiles(fs)}}});
+
+load(); render();
+
+</script>
+
+</body></html>
