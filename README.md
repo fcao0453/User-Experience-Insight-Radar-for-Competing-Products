@@ -13,7 +13,6 @@ cp .env.example .env
 npm start
 ```
 
-浏览器打开 http://127.0.0.1:3000。
 
 ## 真实 AI
 
